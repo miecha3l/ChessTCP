@@ -10,8 +10,8 @@ Board::Board(){
     }
 	currentTurn = "white";
 	currentFlag = "playing";
-	whiteTime = "0:00";
-	blackTime = "0:00";
+	whiteTime = "";
+	blackTime = "";
 }
 
 void Board::addPiece(Piece *p){
@@ -62,5 +62,4 @@ Piece *Board::getPieceWithCoords(int x, int y) {
 std::string Board::getBlackTime() { return blackTime; }
 std::string Board::getWhiteTime() { return whiteTime; }
 std::string Board::getCurrentTurn() { return currentTurn; }
-void Board::setCurrentTurn(std::string t) { currentTurn = t; }
 std::string Board::getCurrentFlag() { return currentFlag; }

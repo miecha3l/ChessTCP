@@ -4,19 +4,19 @@ GameState::GameState()
 {
 }
 
-GameState::GameState(Board gameBoard) {
-	whiteTimeLeft = gameBoard.getWhiteTime();
-	blackTimeLeft = gameBoard.getBlackTime();
-	currentGameTurn = gameBoard.getCurrentTurn();
-	currentFlag = gameBoard.getCurrentFlag();
-
-	for (auto p : gameBoard.white_pieces) {
-		whitePieces.push_back(CompressedPiece(p->getName(), p->getBoardPosition(), p->legalMoves));
-	}
-	for (auto p : gameBoard.black_pieces) {
-		blackPieces.push_back(CompressedPiece(p->getName(), p->getBoardPosition(), p->legalMoves));
-	}
-}
+//GameState::GameState(Board gameBoard) {
+//	whiteTimeLeft = gameBoard.getWhiteTime();
+//	blackTimeLeft = gameBoard.getBlackTime();
+//	currentGameTurn = gameBoard.getCurrentTurn();
+//	currentFlag = gameBoard.getCurrentFlag();
+//
+//	for (auto p : gameBoard.white_pieces) {
+//		whitePieces.push_back(CompressedPiece(p->getName(), p->getBoardPosition(), p->legalMoves));
+//	}
+//	for (auto p : gameBoard.black_pieces) {
+//		blackPieces.push_back(CompressedPiece(p->getName(), p->getBoardPosition(), p->legalMoves));
+//	}
+//}
 
 GameState::GameState(std::string gameStateAsString) {
 	std::string currentPart = "";
@@ -65,7 +65,7 @@ GameState::GameState(std::string gameStateAsString) {
 					semicolonCount++;
 					if (semicolonCount == 1) currentGameTurn = buff;
 					else if (semicolonCount == 2) currentFlag = buff;
-					else if (semicolonCount == 3) whiteTimeLeft = buff;
+					else if (semicolonCount == 3) whiteTimeLeft = buff; 
 					else if (semicolonCount == 4) blackTimeLeft = buff;
 					buff.clear();
 					continue;
@@ -128,7 +128,8 @@ std::string GameState::getWhiteTimeLeft() { return whiteTimeLeft; }
 void GameState::setWhiteTimeLeft(std::string t) { whiteTimeLeft = t; }
 std::string GameState::getCurrentGameTurn() { return currentGameTurn; }
 void GameState::setCurrentGameTurn(std::string s) { currentGameTurn = s; }
-
+std::vector<CompressedPiece> GameState::getBlackPieces() { return blackPieces; }
+std::vector<CompressedPiece> GameState::getWhitePieces() { return whitePieces; }
 GameState::~GameState()
 {
 }

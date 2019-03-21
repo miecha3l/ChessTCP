@@ -26,6 +26,9 @@ public:
 	std::string getBlackTimeLeft();
 	std::string getCurrentGameTurn();
 	void setCurrentGameTurn(std::string);
+	std::vector<CompressedPiece> getWhitePieces();
+	std::vector<CompressedPiece> getBlackPieces();
+
 
 	std::string parseGameStateToString();
 	void print();

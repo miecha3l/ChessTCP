@@ -6,6 +6,11 @@
 Board gameBoard;
 bool clientDisconnected = false;
 void createClassicSet(std::string color);
+void resolveClientConnection();
+bool isWhiteConnected = false;
+bool isBlackConnected = false;
+bool firstTurn = true;
+sf::Thread resolveConnections(&resolveClientConnection);
 
 int main() {
 	
@@ -19,7 +24,8 @@ int main() {
 		createClassicSet("black");
 
 		for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
-		for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
+	
+		resolveConnections.launch();
 
 		sf::TcpListener clientListener;
 		sf::TcpSocket clientWhite, clientBlack;
@@ -27,26 +33,37 @@ int main() {
 
 		clientListener.listen(1234);
 		clientListener.accept(clientWhite);
+		isWhiteConnected = true;
 		std::cout << "White connected" << std::endl;
 
 		clientListener.listen(4321);
 		clientListener.accept(clientBlack);
+		isBlackConnected = true;
 		std::cout << "Black connected" << std::endl;
 
 
 		std::cout << "connection resolved\n";
+		resolveConnections.terminate();
 
 		while (!clientDisconnected) {
 			GameState gs(gameBoard);
 
 			sf::Packet message;
 			message << gs.parseGameStateToString();
-			if (gameBoard.getCurrentTurn() == "black") {
+			if (firstTurn) {
 				clientBlack.send(message);
+				clientWhite.send(message);
+				firstTurn = false;
 			}
 			else {
-				clientWhite.send(message);
+				if (gameBoard.getCurrentTurn() == "black") {
+					clientBlack.send(message);
+				}
+				else {
+					clientWhite.send(message);
+				}
 			}
+			
 
 			sf::Packet response;
 			std::string container;
@@ -144,5 +161,21 @@ void createClassicSet(std::string color) {
 	}
 	else {
 		std::cout << "Invalid color";
+	}
+}
+
+void resolveClientConnection() {
+	while (!isWhiteConnected || !isBlackConnected) {
+		sf::TcpListener listener;
+		sf::TcpSocket temp;
+
+		listener.listen(1111);
+		listener.accept(temp);
+		std::string freePort = isWhiteConnected ? "4321" : "1234";
+		std::string color = isWhiteConnected ? "black" : "white";
+		sf::Packet msg;
+		msg << freePort << color;
+
+		temp.send(msg);
 	}
 }

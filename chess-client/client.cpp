@@ -32,12 +32,14 @@ void drawLegalMoves(CompressedPiece p);
 void windowThread() {
 	bool isPieceSelected = false;
 	CompressedPiece pieceSelected("not_found;00;;");
-	backgroundTexture.loadFromFile("assets/background.png");
+	std::string backgroundPath = color == "black" ? "assets/backgroundBlack.png" : "assets/backgroundWhite.png";
+	backgroundTexture.loadFromFile(backgroundPath);
 	background.setTexture(backgroundTexture);
 
 	client.create(resolution, "Chess");
 	while (client.isOpen()) {
 		sf::Event evnt;
+
 		while (client.pollEvent(evnt)) {
 			if (evnt.type == sf::Event::Closed) client.close();
 
@@ -70,6 +72,7 @@ tgui::Gui gui{menu};
 tgui::TextBox::Ptr connectionAddrInput;
 tgui::Button::Ptr submitInput;
 std::string ipAddr;
+int port;
 
 int main() {
 
@@ -88,9 +91,17 @@ int main() {
 			menu.display();
 		}
 
-		Connection gameServer(ipAddr, port);
+		Connection gameServer(ipAddr, 1111);
 		serverConnection.connect(gameServer.ipAddr, gameServer.port);
+		sf::Packet portInfo; std::string msgCont;
+		serverConnection.receive(portInfo);
+		portInfo >> msgCont >> color;
+		port = std::stoi(msgCont);
 
+		serverConnection.disconnect();
+
+		gameServer.port = port;
+		serverConnection.connect(gameServer.ipAddr, gameServer.port);
 
 		clientWindow.launch();
 		while (true) {
@@ -102,6 +113,7 @@ int main() {
 			initialMessage >> initialContainer;
 			gs = GameState(initialContainer);
 
+			if (color == "black" && gs.getCurrentGameTurn() == "white") continue;
 
 			while (response.size() == 0) {
 				system("cls");
@@ -130,7 +142,13 @@ void drawGameState(GameState gs, sf::RenderWindow &w) {
 	
 	std::string texturePathRoot = "assets/";
 	for (auto p : gs.getWhitePieces()) {
-		sf::Vector2f screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+		sf::Vector2f screenPos;
+		if (color == "white") {
+			screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+		}
+		else {
+			screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, ((7 - p.boardPos.y) * tileDims) + offset);
+		}
 		sf::Texture texture;
 		sf::Sprite piece;
 
@@ -147,7 +165,14 @@ void drawGameState(GameState gs, sf::RenderWindow &w) {
 	}
 
 	for (auto p : gs.getBlackPieces()) {
-		sf::Vector2f screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+		sf::Vector2f screenPos;
+		if (color == "white") {
+			screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+		}
+		else{
+			screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, ((7 - p.boardPos.y) * tileDims) + offset);
+		}
+		
 		sf::Texture texture;
 		sf::Sprite piece;
 
@@ -169,9 +194,9 @@ CompressedPiece getPieceClicked(sf::RenderWindow &w) {
 	
 	if (color == "white") {
 		for (auto p : gs.getWhitePieces()) {
-			sf::Vector2f screenPostion = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
-			if (posClicked.x >= screenPostion.x && posClicked.x <= screenPostion.x + tileDims &&
-				posClicked.y >= screenPostion.y && posClicked.y <= screenPostion.y + tileDims) {
+			sf::Vector2f screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+			if (posClicked.x >= screenPos.x && posClicked.x <= screenPos.x + tileDims &&
+				posClicked.y >= screenPos.y && posClicked.y <= screenPos.y + tileDims) {
 				return p;
 			}
 		}
@@ -179,9 +204,9 @@ CompressedPiece getPieceClicked(sf::RenderWindow &w) {
 	}
 	else {
 		for (auto p : gs.getBlackPieces()) {
-			sf::Vector2f screenPostion = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
-			if (posClicked.x >= screenPostion.x && posClicked.x <= screenPostion.x + tileDims &&
-				posClicked.y >= screenPostion.y && posClicked.y <= screenPostion.y + tileDims) {
+			sf::Vector2f screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, ((7 - p.boardPos.y) * tileDims) + offset);
+			if (posClicked.x >= screenPos.x && posClicked.x <= screenPos.x + tileDims &&
+				posClicked.y >= screenPos.y && posClicked.y <= screenPos.y + tileDims) {
 				return p;
 			}
 		}
@@ -194,10 +219,16 @@ void drawLegalMoves(CompressedPiece p) {
 	markText.loadFromFile("assets/moveMark.png");
 
 	for (auto m : p.legalMoves) {
-		sf::Vector2f screenPostion = sf::Vector2f((m.moveCoords.x * tileDims) + offset, (m.moveCoords.y * tileDims) + offset);
+		sf::Vector2f screenPos;
+		if (color == "white") {
+			screenPos = sf::Vector2f((m.moveCoords.x * tileDims) + offset, (m.moveCoords.y * tileDims) + offset);
+		}
+		else {
+			screenPos = sf::Vector2f((m.moveCoords.x * tileDims) + offset, ((7 - m.moveCoords.y) * tileDims) + offset);
+		}
 		sf::Sprite mark;
 		mark.setTexture(markText);
-		mark.setPosition(screenPostion);
+		mark.setPosition(screenPos);
 
 		client.draw(mark);
 	}
@@ -206,9 +237,15 @@ void drawLegalMoves(CompressedPiece p) {
 int getClickedMove(CompressedPiece p) {
 	sf::Vector2i posClicked = sf::Mouse::getPosition(client);
 	for (auto m : p.legalMoves) {
-		sf::Vector2f screenPostion = sf::Vector2f((m.moveCoords.x * tileDims) + offset, (m.moveCoords.y * tileDims) + offset);
-		if (posClicked.x >= screenPostion.x && posClicked.x <= screenPostion.x + tileDims &&
-			posClicked.y >= screenPostion.y && posClicked.y <= screenPostion.y + tileDims) {
+		sf::Vector2f screenPos;
+		if (color == "white") {
+			screenPos = sf::Vector2f((m.moveCoords.x * tileDims) + offset, (m.moveCoords.y * tileDims) + offset);
+		}
+		else {
+			screenPos = sf::Vector2f((m.moveCoords.x * tileDims) + offset, ((7 - m.moveCoords.y) * tileDims) + offset);
+		}
+		if (posClicked.x >= screenPos.x && posClicked.x <= screenPos.x + tileDims &&
+			posClicked.y >= screenPos.y && posClicked.y <= screenPos.y + tileDims) {
 			return m.id;
 		}
 	}

@@ -17,5 +17,5 @@ void initGui() {
 	submitInput->setSize(75, 30);
 	submitInput->setPosition(462.5, 380);
 	submitInput->setText("Connect");
-	submitInput->connect("pressed", [&]() {port = std::stoi(connectionAddrInput->getText().toAnsiString()); menu.close(); });
+	submitInput->connect("pressed", [&]() {ipAddr = connectionAddrInput->getText().toAnsiString(); menu.close(); });
 }

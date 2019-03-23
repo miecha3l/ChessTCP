@@ -3,7 +3,7 @@
 #include "TGUI/TGUI.hpp"
 
 extern sf::RenderWindow menu;
-extern int port;
+extern std::string ipAddr;
 extern tgui::Gui gui;
 
 void initGui();

@@ -4,77 +4,112 @@
 #include "Chess.h"
 
 Board gameBoard;
-
+bool clientDisconnected = false;
 void createClassicSet(std::string color);
 
 int main() {
-	createClassicSet("white");
-	createClassicSet("black");
-
-	for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
-	for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
-
-	sf::TcpListener clientListener;
-	sf::TcpSocket clientWhite, clientBlack;
-	clientListener.listen(1234);
-	clientListener.accept(clientWhite);
-
-	clientListener.listen(4321);
-	clientListener.accept(clientBlack);
-	std::cout << "connection resolved\n";
+	
 
 	while (true) {
 		system("cls");
-		gameBoard.showOperationalBoard();
-		GameState gs(gameBoard);
+		clientDisconnected = false;
 
-		sf::Packet message;
-		std::string msgContainer = gs.parseGameStateToString();
-		std::cout << msgContainer;
-		message << msgContainer;
-		if (gameBoard.getCurrentTurn() == "black") {
-			clientBlack.send(message);
-		}
-		else {
-			clientWhite.send(message);
-		}
-
-		sf::Packet response;
-		std::string container;
-		if (gameBoard.getCurrentTurn() == "black") {
-			clientBlack.receive(response);
-		}
-		else {
-			clientWhite.receive(response);
-		}
-		response >> container;
-
-		int moveId = std::stoi(container);
-		if (gameBoard.getCurrentTurn() == "white") {
-			for (auto p : gameBoard.white_pieces) {
-				for (auto m : p->legalMoves) {
-					if (m.id == moveId) p->pushMove(m, gameBoard);
-				}
-			}
-		}
-		else {
-			for (auto p : gameBoard.black_pieces) {
-				for (auto m : p->legalMoves) {
-					if (m.id == moveId) p->pushMove(m, gameBoard);
-				}
-			}
-		}
+		gameBoard = Board();
+		createClassicSet("white");
+		createClassicSet("black");
 
 		for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
 		for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
-		BoardAnalisys::revalidateBlackMoves(gameBoard);
-		BoardAnalisys::revalidateWhiteMoves(gameBoard);
 
-		if (gameBoard.getCurrentTurn() == "white") gameBoard.setCurrentTurn("black");
-		else if (gameBoard.getCurrentTurn() == "black") gameBoard.setCurrentTurn("white");
+		sf::TcpListener clientListener;
+		sf::TcpSocket clientWhite, clientBlack;
+		std::cout << "Waiting for players..." << std::endl;
+
+		clientListener.listen(1234);
+		clientListener.accept(clientWhite);
+		std::cout << "White connected" << std::endl;
+
+		clientListener.listen(4321);
+		clientListener.accept(clientBlack);
+		std::cout << "Black connected" << std::endl;
+
+
+		std::cout << "connection resolved\n";
+
+		while (!clientDisconnected) {
+			GameState gs(gameBoard);
+
+			sf::Packet message;
+			message << gs.parseGameStateToString();
+			if (gameBoard.getCurrentTurn() == "black") {
+				clientBlack.send(message);
+			}
+			else {
+				clientWhite.send(message);
+			}
+
+			sf::Packet response;
+			std::string container;
+			if (gameBoard.getCurrentTurn() == "black") {
+				clientBlack.receive(response);
+			}
+			else {
+				clientWhite.receive(response);
+			}
+			response >> container;
+
+			try {
+				int moveId = std::stoi(container);
+				if (gameBoard.getCurrentTurn() == "white") {
+					for (auto p : gameBoard.white_pieces) {
+						for (auto m : p->legalMoves) {
+							if (m.id == moveId) {
+								if (p->validateMove(m, gameBoard)) p->pushMove(m, gameBoard);
+							}
+						}
+					}
+				}
+				else {
+					for (auto p : gameBoard.black_pieces) {
+						for (auto m : p->legalMoves) {
+							if (m.id == moveId) {
+								if (p->validateMove(m, gameBoard)) p->pushMove(m, gameBoard);
+							}
+						}
+					}
+				}
+
+				
+
+				if (gameBoard.getCurrentTurn() == "white") {
+					gameBoard.setCurrentTurn("black");
+					for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
+					BoardAnalisys::revalidateBlackMoves(gameBoard);
+
+					gs = GameState(gameBoard);
+					sf::Packet message;
+					message << gs.parseGameStateToString();
+					clientWhite.send(message);
+				}
+				else if (gameBoard.getCurrentTurn() == "black") {
+					gameBoard.setCurrentTurn("white");
+					for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
+					BoardAnalisys::revalidateWhiteMoves(gameBoard);
+
+					gs = GameState(gameBoard);
+					sf::Packet message;
+					message << gs.parseGameStateToString();
+					clientBlack.send(message);
+				}
+
+
+			}
+			catch (std::invalid_argument &e) {
+				std::cout << e.what() << std::endl;
+				clientDisconnected = true;
+			}
+		}
 	}
-	
-
 
 	system("pause");
 	return 0;

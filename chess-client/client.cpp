@@ -1,71 +1,216 @@
 #include "SFML/Graphics.hpp"
 #include "SFML/Network.hpp"
 #include "Chess.h"
+#include "gui.h"
 #include "GameState.h"
 #include <iostream>
 
 GameState gs;
+sf::VideoMode resolution(1000, 760);
+sf::RenderWindow client;
+sf::RenderWindow menu;
 
+std::string color;
+int tileDims = 70;
+int offset = 100;
+std::string response;
+sf::Texture backgroundTexture;
+sf::Sprite background;
+
+sf::TcpSocket serverConnection;
 struct Connection {
 	std::string ipAddr;
 	int port;
 	Connection(std::string ip, int port) : ipAddr(ip), port(port){}
 };
 
-int main() {
-	sf::TcpSocket serverConnection;
-	std::string temp;
-	int port = 0;
-	std::cout << "Select color: "; std::cin >> temp;
-	if (temp == "white") port = 1234;
-	else port = 4321;
+void drawGameState(GameState gs, sf::RenderWindow &w);
+CompressedPiece getPieceClicked(sf::RenderWindow &w);
+int getClickedMove(CompressedPiece p);
+void drawLegalMoves(CompressedPiece p);
 
-	Connection gameServer("127.0.0.1", port);
-	serverConnection.connect(gameServer.ipAddr, gameServer.port);
+void windowThread() {
+	bool isPieceSelected = false;
+	CompressedPiece pieceSelected("not_found;00;;");
+	backgroundTexture.loadFromFile("assets/background.png");
+	background.setTexture(backgroundTexture);
 
-	while (true) {
-		system("cls");
-		sf::Packet message;
-		std::string container;
-		serverConnection.receive(message);
-		message >> container;
+	client.create(resolution, "Chess");
+	while (client.isOpen()) {
+		sf::Event evnt;
+		while (client.pollEvent(evnt)) {
+			if (evnt.type == sf::Event::Closed) client.close();
 
+			if (evnt.type == sf::Event::MouseButtonPressed && gs.getCurrentGameTurn() == color) {
+				if (isPieceSelected && pieceSelected.name != "not_found") {
+					int moveId = getClickedMove(pieceSelected);
+					if (moveId > 0) response = std::to_string(moveId);
+				}
 
-		std::cout << container << std::endl;
-		system("pause");
-		system("cls");
-
-		GameState gs(container);
-		gs.print();
-
-		system("pause");
-		system("cls");
-
-
-		if (port == 1234) {
-			for (auto p : gs.getWhitePieces()) {
-				p.print();
+				CompressedPiece piece = getPieceClicked(client);
+				pieceSelected = piece;
+				if (piece.name != "not_found") isPieceSelected = true;
+				else isPieceSelected = false;
 			}
-
-			std::string response;
-			std::cin >> response;
-			sf::Packet message;
-			message << response;
-			serverConnection.send(message);
 		}
-		else if (port == 4321) {
-			for (auto p : gs.getBlackPieces()) {
-				p.print();
+
+
+		client.clear();
+		client.draw(background);
+		if (isPieceSelected) {
+			drawLegalMoves(pieceSelected);
+		}
+		drawGameState(gs, client);
+		client.display();
+	}
+}
+
+sf::Thread clientWindow(&windowThread);
+tgui::Gui gui{menu};
+tgui::TextBox::Ptr connectionAddrInput;
+tgui::Button::Ptr submitInput;
+std::string ipAddr;
+
+int main() {
+
+	initGui();
+	while (true) {
+		menu.create(resolution, "Chess - menu");
+		while (menu.isOpen()) {
+			sf::Event evnt;
+			while (menu.pollEvent(evnt)) {
+				if (evnt.type == sf::Event::Closed) menu.close();
+				gui.handleEvent(evnt);
 			}
 
-			std::string response;
-			std::cin >> response;
+			menu.clear();
+			gui.draw();
+			menu.display();
+		}
+
+		Connection gameServer(ipAddr, port);
+		serverConnection.connect(gameServer.ipAddr, gameServer.port);
+
+
+		clientWindow.launch();
+		while (true) {
+			response.clear();
+
+			sf::Packet initialMessage;
+			std::string initialContainer;
+			serverConnection.receive(initialMessage);
+			initialMessage >> initialContainer;
+			gs = GameState(initialContainer);
+
+
+			while (response.size() == 0) {
+				system("cls");
+				std::cout << "waiting for move" << std::endl;
+			}
+
+
 			sf::Packet message;
 			message << response;
 			serverConnection.send(message);
-		}	
+
+			sf::Packet serverCallback;
+			std::string container;
+			serverConnection.receive(message);
+			message >> container;
+			gs = GameState(container);
+
+		}
 	}
-	
+		
 	system("pause");
 	return 0;
+}
+
+void drawGameState(GameState gs, sf::RenderWindow &w) {
+	
+	std::string texturePathRoot = "assets/";
+	for (auto p : gs.getWhitePieces()) {
+		sf::Vector2f screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+		sf::Texture texture;
+		sf::Sprite piece;
+
+		std::string completePath = texturePathRoot;
+		completePath.append("white/");
+		completePath.append(p.name);
+		completePath.append(".png");
+
+		texture.loadFromFile(completePath);
+		piece.setTexture(texture);
+		piece.setPosition(screenPos);
+
+		w.draw(piece);
+	}
+
+	for (auto p : gs.getBlackPieces()) {
+		sf::Vector2f screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+		sf::Texture texture;
+		sf::Sprite piece;
+
+		std::string completePath = texturePathRoot;
+		completePath.append("black/");
+		completePath.append(p.name);
+		completePath.append(".png");
+
+		texture.loadFromFile(completePath);
+		piece.setTexture(texture);
+		piece.setPosition(screenPos);
+
+		w.draw(piece);
+	}
+}
+
+CompressedPiece getPieceClicked(sf::RenderWindow &w) {
+	sf::Vector2i posClicked = sf::Mouse::getPosition(w);
+	
+	if (color == "white") {
+		for (auto p : gs.getWhitePieces()) {
+			sf::Vector2f screenPostion = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+			if (posClicked.x >= screenPostion.x && posClicked.x <= screenPostion.x + tileDims &&
+				posClicked.y >= screenPostion.y && posClicked.y <= screenPostion.y + tileDims) {
+				return p;
+			}
+		}
+		return CompressedPiece("not_found;00;;");
+	}
+	else {
+		for (auto p : gs.getBlackPieces()) {
+			sf::Vector2f screenPostion = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+			if (posClicked.x >= screenPostion.x && posClicked.x <= screenPostion.x + tileDims &&
+				posClicked.y >= screenPostion.y && posClicked.y <= screenPostion.y + tileDims) {
+				return p;
+			}
+		}
+		return CompressedPiece("not_found;00;;");
+	}
+}
+
+void drawLegalMoves(CompressedPiece p) {
+	sf::Texture markText;
+	markText.loadFromFile("assets/moveMark.png");
+
+	for (auto m : p.legalMoves) {
+		sf::Vector2f screenPostion = sf::Vector2f((m.moveCoords.x * tileDims) + offset, (m.moveCoords.y * tileDims) + offset);
+		sf::Sprite mark;
+		mark.setTexture(markText);
+		mark.setPosition(screenPostion);
+
+		client.draw(mark);
+	}
+}
+
+int getClickedMove(CompressedPiece p) {
+	sf::Vector2i posClicked = sf::Mouse::getPosition(client);
+	for (auto m : p.legalMoves) {
+		sf::Vector2f screenPostion = sf::Vector2f((m.moveCoords.x * tileDims) + offset, (m.moveCoords.y * tileDims) + offset);
+		if (posClicked.x >= screenPostion.x && posClicked.x <= screenPostion.x + tileDims &&
+			posClicked.y >= screenPostion.y && posClicked.y <= screenPostion.y + tileDims) {
+			return m.id;
+		}
+	}
+	return -9999;
 }

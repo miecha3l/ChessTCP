@@ -4,82 +4,66 @@
 #include "Chess.h"
 
 Board gameBoard;
-sf::IpAddress addr("127.0.0.1");
-
-sf::TcpListener infoListener, whiteListener, blackListener;
-sf::TcpSocket clientWhite, clientBlack, tempSocket;
-bool isWhiteConnected = false, isBlackConnected = false;
-int whitePort = 0, blackPort = 0;
-
-void connectWhite() {
-	blackListener.setBlocking(true);
-	blackListener.listen(blackPort);
-	blackListener.accept(clientBlack);
-	isBlackConnected = true;
-}
-
-void connectBlack() {
-	whiteListener.setBlocking(true);
-	whiteListener.listen(whitePort);
-	whiteListener.accept(clientWhite);
-	isWhiteConnected = true;
-}
-
+bool clientDisconnected = false;
 void createClassicSet(std::string color);
+void resolveClientConnection();
+bool isWhiteConnected = false;
+bool isBlackConnected = false;
+bool firstTurn = true;
+sf::Thread resolveConnections(&resolveClientConnection);
 
 int main() {
-	srand(time(NULL));
+	
 
-	createClassicSet("white");
-	createClassicSet("black");
+	while (true) {
+		system("cls");
+		clientDisconnected = false;
 
-	for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
-	for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
+		gameBoard = Board();
+		createClassicSet("white");
+		createClassicSet("black");
 
-	sf::Thread doWhite(connectWhite);
-	sf::Thread doBlack(connectBlack);
+		for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
+	
+		resolveConnections.launch();
 
-	while (whitePort == 0 || blackPort == 0) {
-		infoListener.listen(1111);
-		infoListener.setBlocking(true);
-		infoListener.accept(tempSocket);
-		sf::Packet portInfo, response;
-		tempSocket.receive(portInfo);
+		sf::TcpListener clientListener;
+		sf::TcpSocket clientWhite, clientBlack;
+		std::cout << "Waiting for players..." << std::endl;
 
-		if (whitePort == 0) {
-			portInfo >> whitePort;
-			std::cout << whitePort << std::endl;
-			doWhite.launch();
-		}
-		else if (blackPort == 0) {
-			portInfo >> blackPort;
-			std::cout << blackPort << std::endl;
-			
-		}
+		clientListener.listen(1234);
+		clientListener.accept(clientWhite);
+		isWhiteConnected = true;
+		std::cout << "White connected" << std::endl;
 
-		response << "OK";
-		tempSocket.send(response);
-	}
+		clientListener.listen(4321);
+		clientListener.accept(clientBlack);
+		isBlackConnected = true;
+		std::cout << "Black connected" << std::endl;
 
 
-	if (isWhiteConnected && isBlackConnected) {
 		std::cout << "connection resolved\n";
+		resolveConnections.terminate();
 
-		while (true) {
-			system("cls");
-			gameBoard.showOperationalBoard();
+		while (!clientDisconnected) {
 			GameState gs(gameBoard);
 
 			sf::Packet message;
-			std::string msgContainer = gs.parseGameStateToString();
-			std::cout << msgContainer;
-			message << msgContainer;
-			if (gameBoard.getCurrentTurn() == "black") {
+			message << gs.parseGameStateToString();
+			if (firstTurn) {
 				clientBlack.send(message);
+				clientWhite.send(message);
+				firstTurn = false;
 			}
 			else {
-				clientWhite.send(message);
+				if (gameBoard.getCurrentTurn() == "black") {
+					clientBlack.send(message);
+				}
+				else {
+					clientWhite.send(message);
+				}
 			}
+			
 
 			sf::Packet response;
 			std::string container;
@@ -91,32 +75,59 @@ int main() {
 			}
 			response >> container;
 
-			int moveId = std::stoi(container);
-			if (gameBoard.getCurrentTurn() == "white") {
-				for (auto p : gameBoard.white_pieces) {
-					for (auto m : p->legalMoves) {
-						if (m.id == moveId) p->pushMove(m, gameBoard);
+			try {
+				int moveId = std::stoi(container);
+				if (gameBoard.getCurrentTurn() == "white") {
+					for (auto p : gameBoard.white_pieces) {
+						for (auto m : p->legalMoves) {
+							if (m.id == moveId) {
+								if (p->validateMove(m, gameBoard)) p->pushMove(m, gameBoard);
+							}
+						}
 					}
 				}
-			}
-			else {
-				for (auto p : gameBoard.black_pieces) {
-					for (auto m : p->legalMoves) {
-						if (m.id == moveId) p->pushMove(m, gameBoard);
+				else {
+					for (auto p : gameBoard.black_pieces) {
+						for (auto m : p->legalMoves) {
+							if (m.id == moveId) {
+								if (p->validateMove(m, gameBoard)) p->pushMove(m, gameBoard);
+							}
+						}
 					}
 				}
+
+				
+
+				if (gameBoard.getCurrentTurn() == "white") {
+					gameBoard.setCurrentTurn("black");
+					for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
+					BoardAnalisys::revalidateBlackMoves(gameBoard);
+
+					gs = GameState(gameBoard);
+					sf::Packet message;
+					message << gs.parseGameStateToString();
+					clientWhite.send(message);
+				}
+				else if (gameBoard.getCurrentTurn() == "black") {
+					gameBoard.setCurrentTurn("white");
+					for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
+					BoardAnalisys::revalidateWhiteMoves(gameBoard);
+
+					gs = GameState(gameBoard);
+					sf::Packet message;
+					message << gs.parseGameStateToString();
+					clientBlack.send(message);
+				}
+
+
 			}
-
-			for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
-			for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
-			BoardAnalisys::revalidateBlackMoves(gameBoard);
-			BoardAnalisys::revalidateWhiteMoves(gameBoard);
-
-			if (gameBoard.getCurrentTurn() == "white") gameBoard.setCurrentTurn("black");
-			else if (gameBoard.getCurrentTurn() == "black") gameBoard.setCurrentTurn("white");
+			catch (std::invalid_argument &e) {
+				std::cout << e.what() << std::endl;
+				clientDisconnected = true;
+			}
 		}
 	}
-	
+
 	system("pause");
 	return 0;
 }
@@ -150,5 +161,21 @@ void createClassicSet(std::string color) {
 	}
 	else {
 		std::cout << "Invalid color";
+	}
+}
+
+void resolveClientConnection() {
+	while (!isWhiteConnected || !isBlackConnected) {
+		sf::TcpListener listener;
+		sf::TcpSocket temp;
+
+		listener.listen(1111);
+		listener.accept(temp);
+		std::string freePort = isWhiteConnected ? "4321" : "1234";
+		std::string color = isWhiteConnected ? "black" : "white";
+		sf::Packet msg;
+		msg << freePort << color;
+
+		temp.send(msg);
 	}
 }

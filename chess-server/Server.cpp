@@ -4,78 +4,119 @@
 #include "Chess.h"
 
 Board gameBoard;
+sf::IpAddress addr("127.0.0.1");
+
+sf::TcpListener infoListener, whiteListener, blackListener;
+sf::TcpSocket clientWhite, clientBlack, tempSocket;
+bool isWhiteConnected = false, isBlackConnected = false;
+int whitePort = 0, blackPort = 0;
+
+void connectWhite() {
+	blackListener.setBlocking(true);
+	blackListener.listen(blackPort);
+	blackListener.accept(clientBlack);
+	isBlackConnected = true;
+}
+
+void connectBlack() {
+	whiteListener.setBlocking(true);
+	whiteListener.listen(whitePort);
+	whiteListener.accept(clientWhite);
+	isWhiteConnected = true;
+}
 
 void createClassicSet(std::string color);
 
 int main() {
+	srand(time(NULL));
+
 	createClassicSet("white");
 	createClassicSet("black");
 
 	for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
 	for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
 
-	sf::TcpListener clientListener;
-	sf::TcpSocket clientWhite, clientBlack;
-	clientListener.listen(1234);
-	clientListener.accept(clientWhite);
+	sf::Thread doWhite(connectWhite);
+	sf::Thread doBlack(connectBlack);
 
-	clientListener.listen(4321);
-	clientListener.accept(clientBlack);
-	std::cout << "connection resolved\n";
+	while (whitePort == 0 || blackPort == 0) {
+		infoListener.listen(1111);
+		infoListener.setBlocking(true);
+		infoListener.accept(tempSocket);
+		sf::Packet portInfo, response;
+		tempSocket.receive(portInfo);
 
-	while (true) {
-		system("cls");
-		gameBoard.showOperationalBoard();
-		GameState gs(gameBoard);
-
-		sf::Packet message;
-		std::string msgContainer = gs.parseGameStateToString();
-		std::cout << msgContainer;
-		message << msgContainer;
-		if (gameBoard.getCurrentTurn() == "black") {
-			clientBlack.send(message);
+		if (whitePort == 0) {
+			portInfo >> whitePort;
+			std::cout << whitePort << std::endl;
+			doWhite.launch();
 		}
-		else {
-			clientWhite.send(message);
+		else if (blackPort == 0) {
+			portInfo >> blackPort;
+			std::cout << blackPort << std::endl;
+			
 		}
 
-		sf::Packet response;
-		std::string container;
-		if (gameBoard.getCurrentTurn() == "black") {
-			clientBlack.receive(response);
-		}
-		else {
-			clientWhite.receive(response);
-		}
-		response >> container;
+		response << "OK";
+		tempSocket.send(response);
+	}
 
-		int moveId = std::stoi(container);
-		if (gameBoard.getCurrentTurn() == "white") {
-			for (auto p : gameBoard.white_pieces) {
-				for (auto m : p->legalMoves) {
-					if (m.id == moveId) p->pushMove(m, gameBoard);
+
+	if (isWhiteConnected && isBlackConnected) {
+		std::cout << "connection resolved\n";
+
+		while (true) {
+			system("cls");
+			gameBoard.showOperationalBoard();
+			GameState gs(gameBoard);
+
+			sf::Packet message;
+			std::string msgContainer = gs.parseGameStateToString();
+			std::cout << msgContainer;
+			message << msgContainer;
+			if (gameBoard.getCurrentTurn() == "black") {
+				clientBlack.send(message);
+			}
+			else {
+				clientWhite.send(message);
+			}
+
+			sf::Packet response;
+			std::string container;
+			if (gameBoard.getCurrentTurn() == "black") {
+				clientBlack.receive(response);
+			}
+			else {
+				clientWhite.receive(response);
+			}
+			response >> container;
+
+			int moveId = std::stoi(container);
+			if (gameBoard.getCurrentTurn() == "white") {
+				for (auto p : gameBoard.white_pieces) {
+					for (auto m : p->legalMoves) {
+						if (m.id == moveId) p->pushMove(m, gameBoard);
+					}
 				}
 			}
-		}
-		else {
-			for (auto p : gameBoard.black_pieces) {
-				for (auto m : p->legalMoves) {
-					if (m.id == moveId) p->pushMove(m, gameBoard);
+			else {
+				for (auto p : gameBoard.black_pieces) {
+					for (auto m : p->legalMoves) {
+						if (m.id == moveId) p->pushMove(m, gameBoard);
+					}
 				}
 			}
+
+			for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
+			for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
+			BoardAnalisys::revalidateBlackMoves(gameBoard);
+			BoardAnalisys::revalidateWhiteMoves(gameBoard);
+
+			if (gameBoard.getCurrentTurn() == "white") gameBoard.setCurrentTurn("black");
+			else if (gameBoard.getCurrentTurn() == "black") gameBoard.setCurrentTurn("white");
 		}
-
-		for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
-		for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
-		BoardAnalisys::revalidateBlackMoves(gameBoard);
-		BoardAnalisys::revalidateWhiteMoves(gameBoard);
-
-		if (gameBoard.getCurrentTurn() == "white") gameBoard.setCurrentTurn("black");
-		else if (gameBoard.getCurrentTurn() == "black") gameBoard.setCurrentTurn("white");
 	}
 	
-
-
 	system("pause");
 	return 0;
 }

@@ -124,6 +124,7 @@
     <ClCompile Include="board.cpp" />
     <ClCompile Include="BoardAnalisys.cpp" />
     <ClCompile Include="CompressedPiece.cpp" />
+    <ClCompile Include="GameInstance.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="king.cpp" />
     <ClCompile Include="knight.cpp" />
@@ -139,6 +140,7 @@
     <ClInclude Include="BoardAnalisys.h" />
     <ClInclude Include="Chess.h" />
     <ClInclude Include="CompressedPiece.h" />
+    <ClInclude Include="GameInstance.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="king.h" />
     <ClInclude Include="knight.h" />

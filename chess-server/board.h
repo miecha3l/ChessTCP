@@ -32,7 +32,7 @@ public:
 	std::string getCurrentFlag();
 	void setCurrentFlag(std::string);
 
-	static void undoLastMove(Board &b);
+	//static void undoLastMove(Board &b);
 
 
     friend class Piece;

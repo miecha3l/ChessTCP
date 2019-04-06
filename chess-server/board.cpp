@@ -47,10 +47,10 @@ Piece *Board::getBlackKing(){
     return NULL;
 }
 
-void Board::undoLastMove(Board &b) {
-	auto lastMove = b.moveStack.back();
-	lastMove.owner->undoMove(lastMove, b);
-}
+//void Board::undoLastMove(Board &b) {
+//	auto lastMove = b.moveStack.back();
+//	lastMove.owner->undoMove(lastMove, b);
+//}
 
 Piece *Board::getPieceWithCoords(int x, int y) {
 	for (auto p : white_pieces) if (p->board_pos.x == x && p->board_pos.y == y) return p;

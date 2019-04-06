@@ -17,6 +17,7 @@ This project is created as submission for my school programming contest "SCI++".
 -handling in game communication <br>
 -syncing clients <br>
 
+## Other information
 ### Stuff used
 [SFML](https://www.sfml-dev.org/download.php) version 2.5.1 and [TGUI](https://tgui.eu/download/) version 0.8
 

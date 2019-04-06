@@ -7,11 +7,11 @@
 class GameInstance {
 private:
 	int ID;
-	sf::TcpSocket clientWhite;
-	sf::TcpSocket clientBlack;
-	Board gameBoard;
+	sf::TcpSocket *clientWhite;
+	sf::TcpSocket *clientBlack;
+	Board *gameBoard;
 
 public:
-	GameInstance(int portWhite, int portBlack, Board b);
+	GameInstance(sf::TcpSocket*, sf::TcpSocket*, Board*);
 	void play();
 };

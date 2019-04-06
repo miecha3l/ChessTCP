@@ -5,21 +5,25 @@
 #include "GameState.h"
 #include <iostream>
 
-GameState gs;
+
 sf::VideoMode resolution(1000, 760);
 sf::RenderWindow client;
-sf::RenderWindow menu;
-std::string color;
-std::string ipAddr;
-const int tileDims = 70;
-const int offset = 100;
-std::string response;
 sf::Texture backgroundTexture;
 sf::Sprite background;
-
-tgui::Gui gui{ menu };
+tgui::Gui gui{ client };
 tgui::TextBox::Ptr connectionAddrInput;
 tgui::Button::Ptr submitInput;
+
+sf::TcpSocket serverConnection;
+std::string playerName;
+bool inGame = false;
+GameState gs;
+std::string color;
+std::string response;
+const int tileDims = 70;
+const int offset = 100;
+
+
 
 void drawGameState(GameState gs, sf::RenderWindow &w);
 CompressedPiece getPieceClicked(sf::RenderWindow &w, GameState gs);
@@ -32,6 +36,8 @@ struct Connection {
 	int port;
 	Connection(std::string ip, int port) : ipAddr(ip), port(port){}
 };
+
+
 void windowThread() {
 	bool isPieceSelected = false;
 	CompressedPiece pieceSelected("not_found;00;;");
@@ -44,97 +50,130 @@ void windowThread() {
 		sf::Event evnt;
 		while (client.pollEvent(evnt)) {
 			if (evnt.type == sf::Event::Closed) client.close();
-			if (evnt.type == sf::Event::MouseButtonPressed && gs.getCurrentGameTurn() == color) {
+
+			//player creating response
+			if (evnt.type == sf::Event::MouseButtonPressed && gs.getCurrentGameTurn() == color && inGame) {
 				if (isPieceSelected && pieceSelected.name != "not_found") {
 					int moveId = getClickedMove(pieceSelected);
+					std::cout << moveId << std::endl;
 					if (moveId > 0) response = std::to_string(moveId);
 				}
 
 				CompressedPiece piece = getPieceClicked(client, gs);
 				pieceSelected = piece;
-				if (piece.name != "not_found") isPieceSelected = true;
-				else isPieceSelected = false;
+				if (piece.name != "not_found") {
+					isPieceSelected = true;
+				}
+				else {
+					isPieceSelected = false;
+				}
 			}
+
 		}
+
 		client.clear();
-		client.draw(background);
-		if (isPieceSelected) {
-			drawLegalMoves(pieceSelected);
+		if (inGame) {
+			client.draw(background);
+			if (isPieceSelected) {
+				drawLegalMoves(pieceSelected);
+			}
+			drawGameState(gs, client);
 		}
-		drawGameState(gs, client);
+		else {
+
+		}
 		client.display();
+	}
+}
+
+void getResponse() {
+	while (!inGame) {
+		sf::Packet srvMsg;
+		std::string data;
+		serverConnection.receive(srvMsg);
+		srvMsg >> data;
+		if (!data.empty()) {
+			if (data == "black" || data == "white") {
+				color = data;
+				inGame = true;
+			}
+			else std::cout << "Response: " << data << std::endl;
+		}
+		data.clear();
 	}
 }
 
 int main() {
 	sf::Thread clientWindow(&windowThread);
-	sf::TcpSocket serverConnection;
-	int port;
+	sf::Thread recieve(&getResponse);
 	sf::Packet serverMessage;
-	std::string messageContainer;
+	std::string data;
 	initGui();
 
-	while (true) {
+	Connection gameServer("127.0.0.1", 8888);
+	serverConnection.connect(gameServer.ipAddr, gameServer.port);
+	serverConnection.receive(serverMessage);
+	serverMessage >> playerName;
+	std::cout << "Welcome " << playerName << std::endl;
 
-		menu.create(resolution, "Chess - menu");
-		while (menu.isOpen()) {
-			sf::Event evnt;
-			while (menu.pollEvent(evnt)) {
-				if (evnt.type == sf::Event::Closed) menu.close();
-				gui.handleEvent(evnt);
-			}
 
-			menu.clear();
-			gui.draw();
-			menu.display();
-		}
 
-		//get port on which the game will be played
-		Connection gameServer(ipAddr, 1111);
-		serverConnection.connect(gameServer.ipAddr, gameServer.port);
-		serverConnection.receive(serverMessage);
-		serverMessage >> messageContainer >> color;
-		port = std::stoi(messageContainer);
-		serverConnection.disconnect();
-		serverMessage.clear();
-		messageContainer.clear();
-		gameServer.port = port;
-		serverConnection.connect(gameServer.ipAddr, gameServer.port);
+	serverConnection.setBlocking(false);
+	recieve.launch();
 
-		clientWindow.launch();
-		while (true) {
-			response.clear();
-
-			//receive gamestate
-			serverConnection.receive(serverMessage);
-			serverMessage >> messageContainer;
-			gs = GameState(messageContainer);
-			serverMessage.clear();
-			messageContainer.clear();
-
-			if (color == "black" && gs.getCurrentGameTurn() == "white") continue;
-
-			//wait for user to pick a move
-			while (response.size() == 0) {
-				system("cls");
-				std::cout << "waiting for move" << std::endl;
-			}
-
-			//send response back to server
-			serverMessage << response;
+	while (!inGame) {
+		std::cin >> data;
+		if (serverConnection.receive(serverMessage) != sf::Socket::Status::Done) {
+			serverMessage << data;
 			serverConnection.send(serverMessage);
-			serverMessage.clear();
-
-			//get visual update
-			serverConnection.receive(serverMessage);
-			serverMessage >> messageContainer;
-			gs = GameState(messageContainer);
-			serverMessage.clear();
-			messageContainer.clear();
 		}
 	}
-		
-	system("pause");
+	data.clear();
+	serverMessage.clear();
+
+	std::cout << color << std::endl;
+	serverConnection.setBlocking(true);
+
+	sf::Packet control;
+	control << "ok";
+	serverConnection.send(control);
+	control.clear();
+
+	clientWindow.launch();
+	while (inGame) {
+		response.clear();
+
+		//receive gamestate
+		serverConnection.receive(serverMessage);
+		serverMessage >> data;
+		gs = GameState(data);
+		serverMessage.clear();
+		data.clear();
+
+		if (color == "black" && gs.getCurrentGameTurn() == "white") continue;
+
+		//wait for user to pick a move
+		while (response.size() == 0) {
+		}
+
+		std::cout << "Response: " << response << std::endl;
+
+		//send response back to server
+		serverMessage << response;
+		serverConnection.send(serverMessage);
+		serverMessage.clear();
+
+		std::cout << "sent" << std::endl;
+
+		//get visual update
+		serverConnection.receive(serverMessage);
+		serverMessage >> data;
+		gs = GameState(data);
+		serverMessage.clear();
+		data.clear();
+	}
+
+
 	return 0;
 }
 

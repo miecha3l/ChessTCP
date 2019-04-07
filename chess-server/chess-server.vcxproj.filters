@@ -13,102 +13,117 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\engine_files">
+      <UniqueIdentifier>{defc9b9b-d770-49cf-ad34-a80d3d992070}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\server_files">
+      <UniqueIdentifier>{72652669-2413-4fab-8dc7-f11ba53aced2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\engine_headers">
+      <UniqueIdentifier>{70aa659d-3e25-484e-87e2-5b2b42bfa876}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\server_headers">
+      <UniqueIdentifier>{c4ff23e3-64f4-4289-8f82-f87cf8e4e676}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GameState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CompressedPiece.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="bishop.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine_files</Filter>
     </ClCompile>
     <ClCompile Include="board.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine_files</Filter>
     </ClCompile>
     <ClCompile Include="BoardAnalisys.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine_files</Filter>
     </ClCompile>
     <ClCompile Include="king.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine_files</Filter>
     </ClCompile>
     <ClCompile Include="knight.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine_files</Filter>
     </ClCompile>
     <ClCompile Include="pawn.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine_files</Filter>
     </ClCompile>
     <ClCompile Include="piece.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine_files</Filter>
     </ClCompile>
     <ClCompile Include="queen.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine_files</Filter>
     </ClCompile>
     <ClCompile Include="rook.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameInstance.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine_files</Filter>
     </ClCompile>
     <ClCompile Include="ServerSource.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine_files</Filter>
     </ClCompile>
-    <ClCompile Include="Server.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="CompressedPiece.cpp">
+      <Filter>Source Files\server_files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameInstance.cpp">
+      <Filter>Source Files\server_files</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\server_files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameState.cpp">
+      <Filter>Source Files\server_files</Filter>
     </ClCompile>
     <ClCompile Include="Request.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\server_files</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>Source Files\server_files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CompressedPiece.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="bishop.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\engine_headers</Filter>
     </ClInclude>
     <ClInclude Include="board.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\engine_headers</Filter>
     </ClInclude>
     <ClInclude Include="BoardAnalisys.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Chess.h">
+      <Filter>Header Files\engine_headers</Filter>
     </ClInclude>
     <ClInclude Include="king.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\engine_headers</Filter>
     </ClInclude>
     <ClInclude Include="knight.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\engine_headers</Filter>
     </ClInclude>
     <ClInclude Include="pawn.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\engine_headers</Filter>
     </ClInclude>
     <ClInclude Include="piece.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\engine_headers</Filter>
     </ClInclude>
     <ClInclude Include="queen.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="rook.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CompressedPiece.h">
+      <Filter>Header Files\server_headers</Filter>
     </ClInclude>
     <ClInclude Include="GameInstance.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\server_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.h">
+      <Filter>Header Files\server_headers</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Server.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\server_headers</Filter>
     </ClInclude>
     <ClInclude Include="Request.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\server_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
+      <Filter>Header Files\server_headers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

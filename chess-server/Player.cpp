@@ -17,14 +17,11 @@ void Player::communicate() {
 	while (status != Status::Disconnected) {
 		sf::Packet packet;
 		std::string container;
-		if (status != Status::InGame) {
-			if (client->receive(packet) == sf::Socket::Status::Done) {
-				communicationQueue.push(packet);
-
-			}
-			else if (client->receive(packet) == sf::Socket::Status::Disconnected) {
-				status = Status::Disconnected;
-			}
+		if (client->receive(packet) == sf::Socket::Status::Done) {
+			communicationQueue.push(packet);
+		}
+		else if (client->receive(packet) == sf::Socket::Status::Disconnected) {
+			status = Status::Disconnected;
 		}
 	}
 }

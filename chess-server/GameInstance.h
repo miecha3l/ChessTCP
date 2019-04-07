@@ -8,6 +8,7 @@
 class GameInstance {
 private:
 	int ID;
+	bool firstTurn;
 	Player *white;
 	Player *black;
 	Board *gameBoard;
@@ -15,5 +16,7 @@ private:
 public:
 	GameInstance(Player*, Player*, Board*);
 	~GameInstance();
-	void play();
+	bool hasPlayer(Player*);
+	GameState updateGameInstance(int);
+	GameState getCurrentGameState();
 };

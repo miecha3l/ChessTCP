@@ -29,9 +29,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Chess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CompressedPiece.h">
       <Filter>Header Files</Filter>
     </ClInclude>

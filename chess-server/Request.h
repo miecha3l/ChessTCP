@@ -7,6 +7,7 @@ class Request
 public:
 	enum Type {
 		REQUEST,
+		GAME_REQ,
 		MESSAGE,
 		OTHER
 	};

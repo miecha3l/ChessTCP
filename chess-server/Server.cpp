@@ -6,8 +6,8 @@
 Server* Server::obj = NULL;
 std::list<GameInstance*> gameInstances;
 std::list<Board*> boards;
-std::list<sf::Thread*> threads;
 std::map<GameInstance*, Board*> boardOf;
+std::map<Player*, GameInstance*> gameOf;
 extern Queue communicationQueue;
 
 
@@ -103,19 +103,20 @@ void Server::handleMessages() {
 			Request::Type eType;
 			msg >> container;
 			int slashes = 0;
-			for (auto c : container) {
+			for (auto c : container) { 
 				if (c == '/') {
-					slashes++;
+					slashes++; 
 					continue;
 				}
-				if (slashes == 0) from.push_back(c);
-				else if (slashes == 1) to.push_back(c);
-				else if (slashes == 2) type.push_back(c);
-				else if (slashes == 3) data.push_back(c);
+				if (slashes == 0) type.push_back(c);
+				else if (slashes == 1) data.push_back(c);
+				else if (slashes == 2) from.push_back(c);
+				else if (slashes == 3) to.push_back(c);
 			}
 
 			if (type == "req") eType = Request::REQUEST;
 			else if (type == "msg") eType = Request::MESSAGE;
+			else if (type == "game_req") eType = Request::GAME_REQ;
 			else eType = Request::OTHER;
 
 			if (!data.empty() && !from.empty() && !to.empty()) {

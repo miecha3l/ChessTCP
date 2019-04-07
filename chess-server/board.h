@@ -31,6 +31,7 @@ public:
 	std::string getCurrentTurn();
 	std::string getCurrentFlag();
 	void setCurrentFlag(std::string);
+	void createClassicSet(std::string color);
 
 	//static void undoLastMove(Board &b);
 

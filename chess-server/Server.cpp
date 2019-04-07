@@ -2,45 +2,14 @@
 #include "Windows.h"
 #include "GameInstance.h"
 #include <list>
-
+#include "Request.h"
 Server* Server::obj = NULL;
-extern Queue communicationQueue;
 std::list<GameInstance*> gameInstances;
 std::list<Board*> boards;
 std::list<sf::Thread*> threads;
 std::map<GameInstance*, Board*> boardOf;
+extern Queue communicationQueue;
 
-void createClassicSet(std::string color, Board &b) {
-	if (color == "white") {
-		for (int i = 0; i < 8; ++i) {
-			b.addPiece((new Pawn(i, 6, "white")));
-		}
-		b.addPiece(new Rook(0, 7, "white"));
-		b.addPiece(new Rook(7, 7, "white"));
-		b.addPiece(new Knight(1, 7, "white"));
-		b.addPiece(new Knight(6, 7, "white"));
-		b.addPiece(new Bishop(2, 7, "white"));
-		b.addPiece(new Bishop(5, 7, "white"));
-		b.addPiece(new Queen(3, 7, "white"));
-		b.addPiece(new King(4, 7, "white"));
-	}
-	else if (color == "black") {
-		for (int i = 0; i < 8; ++i) {
-			b.addPiece((new Pawn(i, 1, "black")));
-		}
-		b.addPiece(new Rook(0, 0, "black"));
-		b.addPiece(new Rook(7, 0, "black"));
-		b.addPiece(new Knight(1, 0, "black"));
-		b.addPiece(new Knight(6, 0, "black"));
-		b.addPiece(new Bishop(2, 0, "black"));
-		b.addPiece(new Bishop(5, 0, "black"));
-		b.addPiece(new Queen(3, 0, "black"));
-		b.addPiece(new King(4, 0, "black"));
-	}
-	else {
-		std::cout << "Invalid color";
-	}
-}
 
 Server::Server()
 {
@@ -131,7 +100,7 @@ void Server::handleMessages() {
 			std::string to;
 			std::string data;
 			
-
+			Request::Type eType;
 			msg >> container;
 			int slashes = 0;
 			for (auto c : container) {
@@ -144,65 +113,14 @@ void Server::handleMessages() {
 				else if (slashes == 2) type.push_back(c);
 				else if (slashes == 3) data.push_back(c);
 			}
-			if (type == "req") {
-				if (data == "match") {
-					if (to != "none") {
-						int fromId = std::stoi(from);
-						int toId = std::stoi(to);
-						matchPlayers(fromId, toId);
-						std::string msg = "match completed";
-						sf::Packet response;
-						response << msg;
-						getPlayer(fromId)->getClient()->send(response);
-						getPlayer(toId)->getClient()->send(response);
-					}
-				}
-				else if (data == "play") {
-					if (to != "none" && to != "match") {
-						int toId = std::stoi(to);
-						int fromId = std::stoi(from);
 
-						getPlayer(fromId)->setPlayersStatus(Player::Status::InGame);
-						getPlayer(toId)->setPlayersStatus(Player::Status::InGame);
+			if (type == "req") eType = Request::REQUEST;
+			else if (type == "msg") eType = Request::MESSAGE;
+			else eType = Request::OTHER;
 
-						boards.push_back(new Board());
-						createClassicSet("white", *boards.back());
-						createClassicSet("black", *boards.back());
-						gameInstances.push_back(new GameInstance(getPlayer(fromId)->getClient(), getPlayer(toId)->getClient(), boards.back()));
-						boardOf[gameInstances.back()] = boards.back();
-						threads.push_back(new sf::Thread(&GameInstance::play, gameInstances.back()));
-
-						sf::Packet resp;
-						resp << "white";
-						getPlayer(fromId)->getClient()->send(resp);
-
-						resp.clear();
-						resp << "black";
-						getPlayer(toId)->getClient()->send(resp);
-
-						threads.back()->launch();
-					}
-					else if (to == "match") {
-						int fromId = std::stoi(from);
-						Player *fromPlr = getPlayer(fromId);
-					}
-				}
-			}
-			else if (type == "msg") {
-				if (to != "none" && to != "match") {
-					int toId = std::stoi(to);
-					int fromId = std::stoi(from);
-					sf::Packet cont;
-					cont << data;
-					getPlayer(toId)->getClient()->send(cont);
-				}
-				else if (to == "match") {
-					int fromId = std::stoi(from);
-					Player *fromPlr = getPlayer(fromId);
-					sf::Packet cont;
-					cont << data;
-					getPlayerMatch(fromPlr)->getClient()->send(cont);
-				}
+			if (!data.empty() && !from.empty() && !to.empty()) {
+				Request req = Request(eType, data, from, to);
+				req.handle();
 			}
 		}
 	}

@@ -103,75 +103,92 @@ void getResponse() {
 	}
 }
 
+void sendReq() {
+	while (!inGame) {
+		sf::Packet srvMsg;
+		std::string data;
+		std::cin >> data;
+		if (serverConnection.receive(srvMsg) != sf::Socket::Status::Done) {
+			srvMsg << data;
+			serverConnection.send(srvMsg);
+		}
+	}
+}
+
 int main() {
 	sf::Thread clientWindow(&windowThread);
 	sf::Thread recieve(&getResponse);
+	sf::Thread send(&sendReq);
 	sf::Packet serverMessage;
 	std::string data;
 	initGui();
 
+	//initial connection
 	Connection gameServer("127.0.0.1", 8888);
 	serverConnection.connect(gameServer.ipAddr, gameServer.port);
 	serverConnection.receive(serverMessage);
 	serverMessage >> playerName;
 	std::cout << "Welcome " << playerName << std::endl;
-
-
-
-	serverConnection.setBlocking(false);
-	recieve.launch();
-
-	while (!inGame) {
-		std::cin >> data;
-		if (serverConnection.receive(serverMessage) != sf::Socket::Status::Done) {
-			serverMessage << data;
-			serverConnection.send(serverMessage);
-		}
-	}
-	data.clear();
-	serverMessage.clear();
-
-	std::cout << color << std::endl;
-	serverConnection.setBlocking(true);
-
-	sf::Packet control;
-	control << "ok";
-	serverConnection.send(control);
-	control.clear();
-
 	clientWindow.launch();
-	while (inGame) {
-		response.clear();
+	
+	//outer client loop
+	while (true) {
+		std::cout << "MENU" << std::endl;
+		//client in menu
+		serverConnection.setBlocking(false);
+		recieve.launch();
+		send.launch();
 
-		//receive gamestate
-		serverConnection.receive(serverMessage);
-		serverMessage >> data;
-		gs = GameState(data);
-		serverMessage.clear();
+		while (!inGame) {}
+
+		recieve.terminate();
+		send.terminate();
+
 		data.clear();
-
-		if (color == "black" && gs.getCurrentGameTurn() == "white") continue;
-
-		//wait for user to pick a move
-		while (response.size() == 0) {
-		}
-
-		std::cout << "Response: " << response << std::endl;
-
-		//send response back to server
-		serverMessage << response;
-		serverConnection.send(serverMessage);
 		serverMessage.clear();
 
-		std::cout << "sent" << std::endl;
+		std::cout << "GAME" << std::endl;
+		serverConnection.setBlocking(true);
 
-		//get visual update
-		serverConnection.receive(serverMessage);
-		serverMessage >> data;
-		gs = GameState(data);
-		serverMessage.clear();
-		data.clear();
+
+		//game loop
+		 do {
+			response.clear();
+
+			//receive gamestate
+			serverConnection.receive(serverMessage);
+			serverMessage >> data;
+			gs = GameState(data);
+			serverMessage.clear();
+			data.clear();
+
+			if (color == "black" && gs.getCurrentGameTurn() == "white") continue;
+			else if (color == "white" && gs.getCurrentGameTurn() == "black") continue;
+
+			//wait for user to pick a move
+			while (response.empty()) {}
+
+			std::cout << "Response: " << response << std::endl;
+
+			//send response back to server
+			serverMessage << response;
+			if (serverConnection.send(serverMessage) == sf::Socket::Status::Done) {
+				std::cout << "sent properly" << std::endl;
+			}
+			else std::cout << "sent not properly" << std::endl;
+			serverMessage.clear();
+
+
+			//get visual update
+			serverConnection.receive(serverMessage);
+			serverMessage >> data;
+			gs = GameState(data);
+			serverMessage.clear();
+			data.clear();
+		 } while (inGame);
+		inGame = false;
 	}
+	
 
 
 	return 0;

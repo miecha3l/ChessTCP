@@ -2,16 +2,18 @@
 #include "SFML/Network.hpp"
 #include "Chess.h"
 #include "GameState.h"
+#include "Server.h"
 #include <thread>
 
 class GameInstance {
 private:
 	int ID;
-	sf::TcpSocket *clientWhite;
-	sf::TcpSocket *clientBlack;
+	Player *white;
+	Player *black;
 	Board *gameBoard;
 
 public:
-	GameInstance(sf::TcpSocket*, sf::TcpSocket*, Board*);
+	GameInstance(Player*, Player*, Board*);
+	~GameInstance();
 	void play();
 };

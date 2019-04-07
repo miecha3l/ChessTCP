@@ -1,25 +1,30 @@
 #include "GameInstance.h"
-
-GameInstance::GameInstance(sf::TcpSocket *w, sf::TcpSocket *b, Board *board) {
+extern std::map<GameInstance*, Board*> boardOf;
+GameInstance::GameInstance(Player *w, Player *b, Board *board) {
 	ID = rand() % 94924895 + 3412;
 	gameBoard = board;
-	clientWhite = w;
-	clientBlack = b;
+	white = w;
+	black = b;
 	
 }
 
 void GameInstance::play() {
+	srand(time(NULL));
 	bool clientDisconnected = false;
 	bool firstTurn = true;
-	sf::Packet control;
+
+	white->getClient()->setBlocking(true);
+	black->getClient()->setBlocking(true);
+
+	/*sf::Packet control; std::string debug;
 	clientBlack->receive(control);
 	clientWhite->receive(control);
-	control.clear();
+	debug.clear();
+	control.clear();*/
 
 	for (auto p : gameBoard->black_pieces) p->findLegalMoves(*gameBoard);
 	for (auto p : gameBoard->white_pieces) p->findLegalMoves(*gameBoard);
-	while (!clientDisconnected) {
-		
+	do{
 		GameState gs(*gameBoard);
 
 		std::cout << "\n\n\n" << gs.parseGameStateToString() << std::endl;
@@ -27,34 +32,37 @@ void GameInstance::play() {
 		sf::Packet message;
 		message << gs.parseGameStateToString();
 		if (firstTurn) {
-			clientBlack->send(message);
-			clientWhite->send(message);
+			white->getClient()->send(message);
+			black->getClient()->send(message);
 			firstTurn = false;
 		}
 		else {
 			if (gameBoard->getCurrentTurn() == "black") {
-				clientBlack->send(message);
+				black->getClient()->send(message);
 			}
 			else {
-				clientWhite->send(message);
+				white->getClient()->send(message);
 			}
 		}
 
 
 		sf::Packet response;
 		std::string container;
-		if (gameBoard->getCurrentTurn() == "black") {
-			std::cout << "waiting for white response" << std::endl;
-			clientBlack->receive(response);
-			std::cout << "received" << std::endl;
+		if (gs.getCurrentGameTurn() == "black") {
+			if (black->getClient()->receive(response) == sf::Socket::Status::Done) {
+				std::cout << "received properly" << std::endl;
+			}
+			else std::cout << "not actually recived" << std::endl;
 		}
 		else {
-			std::cout << "waiting for white response" << std::endl;
-			clientWhite->receive(response);
-			std::cout << "received" << std::endl;
+			if (white->getClient()->receive(response) == sf::Socket::Status::Done) {
+				std::cout << "received properly" << std::endl;
+			}
+			else std::cout << "not actually recived" << std::endl;
 		}
 		response >> container;
 		std::cout << container << std::endl;
+		response.clear();
 
 		try {
 			int moveId = std::stoi(container);
@@ -77,7 +85,7 @@ void GameInstance::play() {
 				}
 			}
 
-
+			container.clear();
 
 			if (gameBoard->getCurrentTurn() == "white") {
 				gameBoard->setCurrentTurn("black");
@@ -87,7 +95,7 @@ void GameInstance::play() {
 				gs = GameState(*gameBoard);
 				sf::Packet message;
 				message << gs.parseGameStateToString();
-				clientWhite->send(message);
+				white->getClient()->send(message);
 			}
 			else if (gameBoard->getCurrentTurn() == "black") {
 				gameBoard->setCurrentTurn("white");
@@ -97,13 +105,21 @@ void GameInstance::play() {
 				gs = GameState(*gameBoard);
 				sf::Packet message;
 				message << gs.parseGameStateToString();
-				clientBlack->send(message);
+				black->getClient()->send(message);
 			}
 
 
-		}
+		} 
 		catch (std::invalid_argument &e) {
+			std::cout << "whops" << std::endl;
 			clientDisconnected = true;
+			white->setPlayersStatus(Player::Status::Idle);
+			black->setPlayersStatus(Player::Status::Idle);
 		}
-	}
+	} while (!clientDisconnected);
+}
+
+GameInstance::~GameInstance() {
+	delete boardOf[this];
+	delete gameBoard;
 }

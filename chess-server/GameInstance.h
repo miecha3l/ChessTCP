@@ -11,10 +11,10 @@ private:
 	bool firstTurn;
 	Player *white;
 	Player *black;
-	Board *gameBoard;
+	Board gameBoard;
 
 public:
-	GameInstance(Player*, Player*, Board*);
+	GameInstance(Player*, Player*);
 	~GameInstance();
 	bool hasPlayer(Player*);
 	GameState updateGameInstance(int);

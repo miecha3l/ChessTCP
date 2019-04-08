@@ -75,6 +75,9 @@
     <ClCompile Include="Server.cpp">
       <Filter>Source Files\server_files</Filter>
     </ClCompile>
+    <ClCompile Include="Queue.cpp">
+      <Filter>Source Files\server_files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bishop.h">
@@ -123,6 +126,9 @@
       <Filter>Header Files\server_headers</Filter>
     </ClInclude>
     <ClInclude Include="Server.h">
+      <Filter>Header Files\server_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Queue.h">
       <Filter>Header Files\server_headers</Filter>
     </ClInclude>
   </ItemGroup>

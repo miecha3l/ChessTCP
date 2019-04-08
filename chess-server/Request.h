@@ -13,9 +13,10 @@ public:
 	};
 
 	Request(Type, std::string, std::string, std::string);
-	//Request(std::string);
 	~Request();
 	void handle();
+	static Request parse(std::string);
+	bool isValid();
 
 private:
 	Type type;

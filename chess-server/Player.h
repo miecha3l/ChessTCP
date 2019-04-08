@@ -2,26 +2,7 @@
 #include <SFML/Network.hpp>
 #include <iostream>
 #include <list>
-struct Queue {
-	std::list<sf::Packet> message;
-
-	sf::Packet pop() {
-		if (message.size() > 0) {
-			sf::Packet toReturn = message.back();
-			message.pop_back();
-			return toReturn;
-		}
-		else return sf::Packet();
-	}
-
-	void push(sf::Packet packet) {
-		message.push_back(packet);
-	}
-
-	int size() {
-		return message.size();
-	}
-};
+#include "Queue.h"
 
 class Player
 {

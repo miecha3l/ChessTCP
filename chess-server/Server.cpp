@@ -6,7 +6,6 @@
 Server* Server::obj = NULL;
 std::list<GameInstance*> gameInstances;
 std::list<Board*> boards;
-std::map<GameInstance*, Board*> boardOf;
 std::map<Player*, GameInstance*> gameOf;
 extern Queue communicationQueue;
 
@@ -66,15 +65,16 @@ void Server::updatePlayersList() {
 					}
 					if (deleted) break;
 				}
-
-				threadOf.erase(plr);
-				matchOf.erase(matchOf[plr]);
-				matchOf.erase(plr);
-				playerOf.erase(plr->getId());
-
+			
 				//remove player obj
 				for (auto p = players.begin(); p != players.end(); p++) {
 					if (*p == plr) {
+						delete gameOf[plr];
+						threadOf.erase(plr);
+						matchOf.erase(matchOf[plr]);
+						matchOf.erase(plr);
+						playerOf.erase(plr->getId());
+						gameOf.erase(plr);
 						delete *p;
 						players.erase(p);
 						deleted = true;
@@ -95,34 +95,10 @@ void Server::handleMessages() {
 		if (communicationQueue.size() > 0){
 			std::string container;
 			sf::Packet msg = communicationQueue.pop();
-			std::string type;
-			std::string from;
-			std::string to;
-			std::string data;
-			
-			Request::Type eType;
 			msg >> container;
-			int slashes = 0;
-			for (auto c : container) { 
-				if (c == '/') {
-					slashes++; 
-					continue;
-				}
-				if (slashes == 0) type.push_back(c);
-				else if (slashes == 1) data.push_back(c);
-				else if (slashes == 2) from.push_back(c);
-				else if (slashes == 3) to.push_back(c);
-			}
 
-			if (type == "req") eType = Request::REQUEST;
-			else if (type == "msg") eType = Request::MESSAGE;
-			else if (type == "game_req") eType = Request::GAME_REQ;
-			else eType = Request::OTHER;
-
-			if (!data.empty() && !from.empty() && !to.empty()) {
-				Request req = Request(eType, data, from, to);
-				req.handle();
-			}
+			Request req = Request::parse(container);
+			if (req.isValid()) req.handle();
 		}
 	}
 }

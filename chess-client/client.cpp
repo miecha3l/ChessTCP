@@ -3,12 +3,14 @@
 #include "Chess.h"
 #include "gui.h"
 #include "GameState.h"
+#include "Response.h";
 #include <iostream>
 
 
 sf::VideoMode resolution(1000, 760);
 sf::RenderWindow client;
-sf::Texture backgroundTexture;
+sf::Texture bgForWhite;
+sf::Texture bgForBlack;
 sf::Sprite background;
 tgui::Gui gui{ client };
 tgui::TextBox::Ptr connectionAddrInput;
@@ -24,12 +26,13 @@ std::string color;
 std::string response;
 const int tileDims = 70;
 const int offset = 100;
+bool hideKnocked = false;
 
 
 
 void drawGameState(GameState gs, sf::RenderWindow &w);
 CompressedPiece getPieceClicked(sf::RenderWindow &w, GameState gs);
-int getClickedMove(CompressedPiece p);
+int getClickedMove(CompressedPiece &p);
 void drawLegalMoves(CompressedPiece p);
 
 
@@ -44,14 +47,14 @@ void windowThread() {
 	bool isPieceSelected = false;
 	bool bgLoaded = false;
 	CompressedPiece pieceSelected("not_found;00;;");
-	
+	bgForWhite.loadFromFile("assets/backgroundWhite.png");
+	bgForBlack.loadFromFile("assets/backgroundBlack.png");
 
 	client.create(resolution, "Chess");
 	while (client.isOpen()) {
 		if (!bgLoaded && !color.empty()) {
-			std::string backgroundPath = color == "black" ? "assets/backgroundBlack.png" : "assets/backgroundWhite.png";
-			backgroundTexture.loadFromFile(backgroundPath);
-			background.setTexture(backgroundTexture);
+			if (color == "white")background.setTexture(bgForWhite);
+			else if (color == "black")background.setTexture(bgForBlack);
 		}
 		sf::Event evnt;
 		while (client.pollEvent(evnt)) {
@@ -86,7 +89,7 @@ void windowThread() {
 			drawGameState(gs, client);
 		}
 		else {
-
+			if (bgLoaded) bgLoaded = false;
 		}
 		client.display();
 	}
@@ -99,29 +102,47 @@ void getResponse() {
 			std::string data, initialGs;
 			serverConnection.receive(srvMsg);
 			srvMsg >> data;
+
 			if (!data.empty()) {
-				if (data[5] == '/') {
-					for (int i = 0; i < 5; ++i) color.push_back(data[i]);
-					for (int i = 6; i < data.size(); i++) initialGs.push_back(data[i]);
-					gs = GameState(initialGs);
-					gsUpToDate = true;
-					inGame = true;
-					serverConnection.setBlocking(true);
+				Response resp = Response::parse(data);
+				if (resp.isValid()) {
+					switch (resp.getType()) {
+					case Response::Type::Match:
+						matchName = resp.handle();
+						break;
+
+					case Response::Type::GameInit:
+						for (int i = 0; i < 5; ++i) color.push_back(resp.handle()[i]);
+						for (int i = 6; i < resp.handle().size(); i++) initialGs.push_back(resp.handle()[i]);
+						gs = GameState(initialGs);
+						gsUpToDate = true;
+						inGame = true;
+						serverConnection.setBlocking(true);
+						break;
+
+					case Response::Type::Plist:
+						break;
+
+					default: break;
+					}
 				}
-				else if (data[7] == '/') {
-					for (int i = 8; i < data.size(); i++) matchName.push_back(data[i]);
-				}
-				else std::cout << "Response: " << data << std::endl;
 			}
-			data.clear();
 		}
+
+
 		while (inGame) {
 			sf::Packet srvMsg;
 			std::string data;
 			serverConnection.receive(srvMsg);
 			srvMsg >> data;
-			gs = GameState(data);
-			gsUpToDate = true;
+			if (!data.empty()) {
+				Response resp = Response::parse(data);
+				if (resp.isValid()) {
+					gs = GameState(resp.handle());
+					gsUpToDate = true;
+				}
+			}
+			
 		}
 	}
 	
@@ -133,6 +154,7 @@ void sendReq() {
 			sf::Packet srvMsg;
 			std::string data;
 			std::cin >> data;
+			data.append("/").append(playerName);
 			if (serverConnection.receive(srvMsg) != sf::Socket::Status::Done && !inGame) {
 				srvMsg << data;
 				serverConnection.send(srvMsg);
@@ -151,9 +173,7 @@ void sendResponse() {
 			data.append("game_req/");
 			response.clear();
 
-			while (response.empty()) {
-				std::cout << "w8 for response" << std::endl;
-			}
+			while (response.empty()) {}
 
 			data.append(response).append("/").append(playerName).append("/").append(matchName);
 			srvMsg << data;
@@ -285,9 +305,12 @@ void drawLegalMoves(CompressedPiece p) {
 	}
 }
 
-int getClickedMove(CompressedPiece p) {
+int getClickedMove(CompressedPiece &p) {
 	sf::Vector2i posClicked = sf::Mouse::getPosition(client);
 	for (auto m : p.legalMoves) {
+		
+		
+
 		sf::Vector2f screenPos;
 		if (color == "white") {
 			screenPos = sf::Vector2f((m.moveCoords.x * tileDims) + offset, (m.moveCoords.y * tileDims) + offset);
@@ -297,6 +320,8 @@ int getClickedMove(CompressedPiece p) {
 		}
 		if (posClicked.x >= screenPos.x && posClicked.x <= screenPos.x + tileDims &&
 			posClicked.y >= screenPos.y && posClicked.y <= screenPos.y + tileDims) {
+			//fake move
+			p.boardPos = m.moveCoords;
 			return m.id;
 		}
 	}

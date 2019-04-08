@@ -45,5 +45,6 @@ void Player::setPlayersStatus(Status s) {
 
 Player::~Player()
 {
+	std::cout << "Destroying player" << std::endl;
 	delete client;
 }

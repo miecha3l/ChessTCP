@@ -78,8 +78,6 @@ public:
 	  */
 	void createClassicSet(std::string color);
 
-
-
     friend class Piece;
     friend class Rook;
     friend class Knight;

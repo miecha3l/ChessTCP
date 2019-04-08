@@ -4,7 +4,6 @@
 
 extern std::list<GameInstance*> gameInstances;
 extern std::list<Board*> boards;
-extern std::map<GameInstance*, Board*> boardOf;
 extern std::map<Player*, GameInstance*> gameOf;
 
 Request::Request(Type t, std::string cont, std::string s, std::string r)
@@ -41,42 +40,76 @@ void Request::handle() {
 				Server::instance()->getPlayer(sender)->setPlayersStatus(Player::Status::InGame);
 				Server::instance()->getPlayer(receiver)->setPlayersStatus(Player::Status::InGame);
 
-				boards.push_back(new Board());
-				boards.back()->createClassicSet("white");
-				boards.back()->createClassicSet("black");
-				gameInstances.push_back(new GameInstance(Server::instance()->getPlayer(sender), Server::instance()->getPlayer(receiver), boards.back()));
-				boardOf[gameInstances.back()] = boards.back();
+				gameInstances.push_back(new GameInstance(Server::instance()->getPlayer(sender), Server::instance()->getPlayer(receiver)));
 				gameOf[Server::instance()->getPlayer(sender)] = gameInstances.back();
 				gameOf[Server::instance()->getPlayer(receiver)] = gameInstances.back();
 
 				std::string initGs = gameInstances.back()->getCurrentGameState().parseGameStateToString();
 				sf::Packet resp;
-				std::string color = "white/";
+				std::string color = "game_init/white\\";
 				resp << color.append(initGs);
 				Server::instance()->getPlayer(sender)->getClient()->send(resp);
 				resp.clear();
 				color.clear();
 
-				color = "black/";
+				color = "game_init/black\\";
 				resp << color.append(initGs);
 				Server::instance()->getPlayer(receiver)->getClient()->send(resp);
 				resp.clear();
 				color.clear();
 			}
 		}
+		else if (content == "get_plist") {
+			std::string response = "plist/";
+			//get player list from server
+		}
 	}
 	else if (type == Type::MESSAGE) {
 		sf::Packet cont;
-		cont << content;
+		std::string response = "message/";
+		response.append(std::to_string(sender)).append(";").append(content);
+		cont << response;
 		Server::instance()->getPlayer(receiver)->getClient()->send(cont);
 	}
 	else if (type == Type::GAME_REQ) {
 		GameState updatedGs = gameOf[Server::instance()->getPlayer(sender)]->updateGameInstance(std::stoi(content));
 		sf::Packet cont;
-		cont << updatedGs.parseGameStateToString();
+		std::string response = "game_update/";
+		cont << response.append(updatedGs.parseGameStateToString());
 		Server::instance()->getPlayer(sender)->getClient()->send(cont);
 		Server::instance()->getPlayer(receiver)->getClient()->send(cont);
 	}
+}
+
+Request Request::parse(std::string container)
+{
+	std::string type;
+	std::string from;
+	std::string to;
+	std::string data;
+	Type eType;
+	int slashes = 0;
+	for (auto c : container) {
+		if (c == '/') {
+			slashes++;
+			continue;
+		}
+		if (slashes == 0) type.push_back(c);
+		else if (slashes == 1) data.push_back(c);
+		else if (slashes == 2) to.push_back(c);
+		else if (slashes == 3) from.push_back(c);
+	}
+
+	if (type == "req") eType = Request::REQUEST;
+	else if (type == "msg") eType = Request::MESSAGE;
+	else if (type == "game_req") eType = Request::GAME_REQ;
+	else eType = Request::OTHER;
+
+	return Request(eType, data, from, to);
+}
+
+bool Request::isValid() {
+	return !(content.empty());
 }
 
 Request::~Request()

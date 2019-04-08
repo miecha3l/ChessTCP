@@ -72,12 +72,21 @@ void Request::handle() {
 		Server::instance()->getPlayer(receiver)->getClient()->send(cont);
 	}
 	else if (type == Type::GAME_REQ) {
-		GameState updatedGs = gameOf[Server::instance()->getPlayer(sender)]->updateGameInstance(std::stoi(content));
-		sf::Packet cont;
-		std::string response = "game_update/";
-		cont << response.append(updatedGs.parseGameStateToString());
-		Server::instance()->getPlayer(sender)->getClient()->send(cont);
-		Server::instance()->getPlayer(receiver)->getClient()->send(cont);
+		if (Server::instance()->getPlayer(receiver) != NULL) {
+			GameState updatedGs = gameOf[Server::instance()->getPlayer(sender)]->updateGameInstance(std::stoi(content));
+			sf::Packet cont;
+			std::string response = "game_update/";
+			cont << response.append(updatedGs.parseGameStateToString());
+			Server::instance()->getPlayer(sender)->getClient()->send(cont);
+			Server::instance()->getPlayer(receiver)->getClient()->send(cont);
+		}
+		else {
+			sf::Packet cont;
+			std::cout << "game_over/enemy_disconnected" << std::endl;
+			cont << "game_over/enemy_disconnected";
+			Server::instance()->getPlayer(sender)->setPlayersStatus(Player::Status::Idle);
+			Server::instance()->getPlayer(sender)->getClient()->send(cont);
+		}
 	}
 }
 

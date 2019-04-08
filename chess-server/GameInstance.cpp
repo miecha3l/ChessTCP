@@ -59,3 +59,23 @@ bool GameInstance::hasPlayer(Player *p)
 {
 	return (p->getId() == white->getId() || p->getId() == black->getId());
 }
+
+bool GameInstance::isAnyPlayerDisconnected()
+{
+	return (white == NULL || black == NULL);
+}
+
+int GameInstance::getId()
+{
+	return ID;
+}
+
+Player * GameInstance::getWhite()
+{
+	return white;
+}
+
+Player * GameInstance::getBlack()
+{
+	return black;
+}

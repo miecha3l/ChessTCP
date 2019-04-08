@@ -13,6 +13,10 @@ private:
 	bool exists;
 	int port;
 	void handleMessages();
+	void acceptClients();
+	void updatePlayersAndGamesList();
+	void handleInput();
+	void printASCII();
 
 	sf::TcpSocket *client;
 	sf::TcpListener listener;
@@ -25,11 +29,13 @@ private:
 
 public:
 	static Server *instance();
-	void acceptClients();
-	void updatePlayersList();
+	
 	int playersCount();
 	int messagesCount();
 	void init();
+	void printPlayerList();
+	void printPlayerListWithInfo();
+	void printGameList();
 	Player* getPlayer(int id);
 	void matchPlayers(int, int);
 	Player* getPlayerMatch(Player*);

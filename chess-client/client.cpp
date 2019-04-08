@@ -27,6 +27,7 @@ std::string response;
 const int tileDims = 70;
 const int offset = 100;
 bool hideKnocked = false;
+std::string gameOverReason;
 
 
 
@@ -138,8 +139,20 @@ void getResponse() {
 			if (!data.empty()) {
 				Response resp = Response::parse(data);
 				if (resp.isValid()) {
-					gs = GameState(resp.handle());
-					gsUpToDate = true;
+					if (resp.getType() == Response::Type::GameUpdate) {
+						gs = GameState(resp.handle());
+						gsUpToDate = true;
+					}
+					else if (resp.getType() == Response::Type::GameOver) {
+						gameOverReason = resp.handle();
+						inGame = false;
+						gs = GameState("");
+						response.clear();
+						gsUpToDate = false;
+						matchName.clear();
+						color.clear();
+						gameOverReason.clear();
+					}
 				}
 			}
 			
@@ -175,7 +188,7 @@ void sendResponse() {
 
 			while (response.empty()) {}
 
-			data.append(response).append("/").append(playerName).append("/").append(matchName);
+			data.append(response).append("/").append(matchName).append("/").append(playerName);
 			srvMsg << data;
 			serverConnection.send(srvMsg);
 			gsUpToDate = false;

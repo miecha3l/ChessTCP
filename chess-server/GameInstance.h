@@ -17,6 +17,10 @@ public:
 	GameInstance(Player*, Player*);
 	~GameInstance();
 	bool hasPlayer(Player*);
+	bool isAnyPlayerDisconnected();
+	int getId();
+	Player *getWhite();
+	Player *getBlack();
 	GameState updateGameInstance(int);
 	GameState getCurrentGameState();
 };

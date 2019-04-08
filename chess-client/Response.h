@@ -9,6 +9,7 @@ public:
 		GameInit,
 		Match,
 		GameUpdate,
+		GameOver,
 		Other
 	};
 	Response(Type, std::string);

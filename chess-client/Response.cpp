@@ -6,30 +6,7 @@ Response::Response(Type t, std::string cont)
 }
 
 std::string Response::handle() {
-	if (type == Type::Match) {
-		std::string matchName;
-		bool match = false;
-		for (char c : content) {
-			if (c == '/') {
-				match = true;
-				continue;
-			}
-			else if (match) {
-				matchName.push_back(c);
-			}
-		}
-
-		return matchName;
-	}
-
-	else if (type == Type::GameInit) {
-		return content;
-	}
-	else if (type == Type::GameUpdate) {
-		return content;
-	}
-
-	return "";
+	return content;
 }
 
 Response Response::parse(std::string container) {
@@ -49,6 +26,7 @@ Response Response::parse(std::string container) {
 	if (sType == "matched") eType = Type::Match;
 	else if (sType == "game_init") eType = Type::GameInit;
 	else if (sType == "game_update") eType = Type::GameUpdate;
+	else if (sType == "game_over") eType = Type::GameOver;
 	else if (sType == "plist") eType = Type::Plist;
 	else eType = Type::Other;
 

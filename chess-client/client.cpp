@@ -151,6 +151,7 @@ void getResponse() {
 						gsUpToDate = false;
 						matchName.clear();
 						color.clear();
+						serverConnection.setBlocking(false);
 						gameOverReason.clear();
 					}
 				}

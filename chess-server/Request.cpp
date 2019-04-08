@@ -3,7 +3,6 @@
 #include "GameInstance.h"
 
 extern std::list<GameInstance*> gameInstances;
-extern std::list<Board*> boards;
 extern std::map<Player*, GameInstance*> gameOf;
 
 Request::Request(Type t, std::string cont, std::string s, std::string r)

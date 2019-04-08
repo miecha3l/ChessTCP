@@ -5,7 +5,6 @@
 #include "Request.h"
 Server* Server::obj = NULL;
 std::list<GameInstance*> gameInstances;
-std::list<Board*> boards;
 std::map<Player*, GameInstance*> gameOf;
 extern Queue communicationQueue;
 
@@ -44,33 +43,6 @@ void Server::acceptClients() {
 
 void Server::updatePlayersAndGamesList() {
 	while (true) {
-		for (auto game : gameInstances) {
-			if (game->isAnyPlayerDisconnected()) {
-				bool deleted = false;
-				for (auto g = gameInstances.begin(); g != gameInstances.end(); g++) {
-					if (*g == game) {
-						if (game->getWhite() != NULL) {
-							sf::Packet cont;
-							cont << "game_over/enemy_disconnected";
-							matchOf[game->getWhite()]->setPlayersStatus(Player::Status::Idle);
-							matchOf[game->getWhite()]->getClient()->send(cont);
-							game->getWhite()->getClient()->send(cont);
-						}
-						else if(game->getWhite() != NULL){
-							sf::Packet cont;
-							cont << "game_over/enemy_disconnected";
-							matchOf[game->getBlack()]->setPlayersStatus(Player::Status::Idle);
-							matchOf[game->getBlack()]->getClient()->send(cont);
-							game->getBlack()->getClient()->send(cont);
-						}
-						delete *g;
-						gameInstances.erase(g);
-					}
-				}
-				if (deleted) break;
-			}
-		}
-
 		for (auto plr : players) {
 			bool deleted = false;
 			if (plr->getPlayersStatus() == Player::Status::Disconnected) {
@@ -94,7 +66,27 @@ void Server::updatePlayersAndGamesList() {
 				//remove player obj
 				for (auto p = players.begin(); p != players.end(); p++) {
 					if (*p == plr) {
-
+						if (gameOf[plr] != NULL) {
+							sf::Packet cont;
+							cont << "game_over/enemy_disconnected";
+							getPlayerMatch(plr)->getClient()->send(cont);
+							getPlayerMatch(plr)->setPlayersStatus(Player::Status::Idle);
+							gameOf.erase(getPlayerMatch(plr));
+							for (auto game : gameInstances) {
+								if (game == gameOf[plr]) {
+									bool deleted = false;
+									for (auto g = gameInstances.begin(); g != gameInstances.end(); g++) {
+										if (*g == game) {
+											delete *g;
+											gameInstances.erase(g);
+											deleted = true;
+											break;
+										}
+									}
+									if (deleted) break;
+								}
+							}
+						}
 						threadOf.erase(plr);
 						matchOf.erase(matchOf[plr]);
 						matchOf.erase(plr);
@@ -145,12 +137,26 @@ void Server::handleInput() {
 			system("cls");
 			printASCII();
 		}
+		else if (input == "debuginfo") {
+			std::cout << "========================DEBUG INFO================================\n";
+			std::cout << "matchOf map size: " << matchOf.size() << std::endl;
+			std::cout << "gameOf map size: " << gameOf.size() << std::endl;
+			std::cout << "playerOf map size: " << playerOf.size() << std::endl;
+
+			std::cout << "players: " << players.size() << std::endl;
+			std::cout << "players threads: " << playerThreads.size() << std::endl;
+			std::cout << "games: " << gameInstances.size() << std::endl;
+			std::cout << "==================================================================\n\n";
+		}
 		else if (input == "?") {
+			std::cout << "========================HELP INFO================================\n";
 			std::cout << "? - show this help info \n";
 			std::cout << "players - show players list \n";
 			std::cout << "players-v - show detailed players list \n";
 			std::cout << "games - show games list \n";
 			std::cout << "clear - clear screen \n";
+			std::cout << "debuginfo - shows server state \n";
+			std::cout << "==================================================================\n\n";
 		}
 		else {
 			std::cout << "Wrong command.\n\n";
@@ -159,17 +165,18 @@ void Server::handleInput() {
 }
 
 void Server::printASCII() {
+	std::cout << R"(                        ___________________  _____ _____ )" << std::endl;
 	std::cout << R"(                       / ____| |  | |  ____|/ ____/ ____|)" << std::endl;
 	std::cout << R"(                      | |    | |__| | |__  | (___| (___  )" << std::endl;
 	std::cout << R"(                      | |    |  __  |  __|  \___ \\___ \ )" << std::endl;
 	std::cout << R"(                      | |____| |  | | |____ ____) |___) |)" << std::endl;
-	std::cout << R"(                       \_____|_|  |_|______|_____/_____/ )" << std::endl;
+	std::cout << R"(                     __\_____|_|_ |_|______|_____/_____/_____ )" << std::endl;
 	std::cout << R"(                    / ____|  ____|  __ \ \    / /  ____|  __ \ )" << std::endl;
 	std::cout << R"(                   | (___ | |__  | |__) \ \  / /| |__  | |__) |)" << std::endl;
 	std::cout << R"(                    \___ \|  __| |  _  / \ \/ / |  __| |  _  / )" << std::endl;
 	std::cout << R"(                    ____) | |____| | \ \  \  /  | |____| | \ \ )" << std::endl;
 	std::cout << R"(                   |_____/|______|_|  \_\  \/   |______|_|  \_\)" << std::endl;
-
+	std::cout << R"(                   --------------v1.0 by miecha3l--------------)" << std::endl;
 }
 
 void Server::init() {
@@ -188,20 +195,19 @@ void Server::init() {
 
 void Server::printPlayerList()
 {
-	std::cout << "======================================================================\n";
-	std::cout << "There is currently " << players.size() << " players online" << std::endl;
+	std::cout << "=============================" << players.size()<< " ONLINE==============================\n";
 	for (auto p : players) {
 		std::cout << "Player: " << p->getId() << std::endl;
 	}
-	std::cout << "======================================================================\n\n";
+	std::cout << "==================================================================\n\n";
 }
 
 void Server::printPlayerListWithInfo()
 {
-	std::cout << "======================================================================\n";
-	std::cout << "There are currently " << players.size() << " players online" << std::endl;
+	std::cout << "=============================" << players.size() << " ONLINE==============================\n";
 	for (auto p : players) {
 		std::string status;
+		std::cout << "-----------------------------------------------\n";
 		std::cout << "Player: " << p->getId() << std::endl;
 		switch (p->getPlayersStatus()) {
 		case Player::Status::InGame:
@@ -223,21 +229,21 @@ void Server::printPlayerListWithInfo()
 		}
 		else std::cout << "Player doesnt have a match" << std::endl;
 		
-		
+		std::cout << "-----------------------------------------------\n";
 	}
-	std::cout << "======================================================================\n\n";
+	std::cout << "==================================================================\n\n";
 }
 
 void Server::printGameList()
 {
-	std::cout << "======================================================================\n";
-	std::cout << "There are currently " << gameInstances.size() << " games being played" << std::endl;
+	std::cout << "=============================" << gameInstances.size() << " GAMES==============================\n";
 	for (auto g : gameInstances) {
+		std::cout << "-----------------------------------------------\n";
 		std::cout << "Game: " << g->getId() << std::endl;
 		std::cout << "Players: \n" << g->getBlack()->getId() << "(black)\n" << g->getWhite()->getId() << "(white)\n";
-		std::cout << "\n";
+		std::cout << "-----------------------------------------------\n";
 	}
-	std::cout << "======================================================================\n\n";
+	std::cout << "==================================================================\n\n";
 }
 
 

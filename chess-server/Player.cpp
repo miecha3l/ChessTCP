@@ -1,11 +1,14 @@
 #include "Player.h"
 #include "Server.h"
 
-Queue communicationQueue;
+Queue<sf::Packet> communicationQueue;
 
 Player::Player(sf::TcpSocket *socket, std::string login)
-	: client(socket), login(login), id(rand() % 9999 + 1), status(Status::Idle)
+	: client(socket), login(login), id(rand() % 9999 + 1000), status(Status::Idle)
 {
+	for (auto p : Server::instance()->getPlayersList()) {
+		while (p->getId() == id) id = rand() % 9999 + 1000;
+	}
 	client->setBlocking(true);
 }
 

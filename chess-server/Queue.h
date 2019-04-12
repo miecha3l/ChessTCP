@@ -3,12 +3,19 @@
 #include <iostream>
 #include <list>
 
+template<typename T>
 class Queue {
 private:
-	std::list<sf::Packet> message;
+	std::list<T> message;
 
 public:
-	sf::Packet pop();
-	void push(sf::Packet packet);
-	int size();
+	T pop() {
+		T pop = message.back();
+		message.pop_back();
+		return pop;
+	}
+	void push(T packet) {
+		message.push_back(packet);
+	}
+	int size() { return message.size(); }
 };

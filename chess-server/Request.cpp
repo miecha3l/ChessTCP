@@ -11,6 +11,9 @@ Request::Request(Type t, std::string cont, std::string s, std::string r)
 	if (r == "match") {
 		receiver = Server::instance()->getPlayerMatch(Server::instance()->getPlayer(sender))->getId();
 	}
+	else if (r == "server") {
+		receiver = 0;
+	}
 	else {
 		receiver = std::stoi(r);
 	}
@@ -19,20 +22,22 @@ Request::Request(Type t, std::string cont, std::string s, std::string r)
 void Request::handle() {
 	if (type == Type::REQUEST) {
 		if(content == "match"){
-			Server::instance()->matchPlayers(sender, receiver);
-			std::string msg = "matched/";
-			msg.append(std::to_string(receiver));
+			std::string msg = "match/";
+			msg.append(std::to_string(sender));
 			sf::Packet response;
 			response << msg;
-			Server::instance()->getPlayer(sender)->getClient()->send(response);
-			response.clear();
-			msg.clear();
-
-			msg = "matched/";
-			msg.append(std::to_string(sender));
 			Server::instance()->getPlayer(receiver)->getClient()->send(response);
-			response.clear();
-			msg.clear();
+		}
+		else if (content == "match_acc") {
+			Server::instance()->matchPlayers(sender, receiver);
+			sf::Packet resp;
+			resp << "match/acc";
+			Server::instance()->getPlayer(receiver)->getClient()->send(resp);
+		}
+		else if (content == "match_dec") {
+			sf::Packet resp;
+			resp << "match/dec";
+			Server::instance()->getPlayer(receiver)->getClient()->send(resp);
 		}
 		else if (content == "play") {
 			if (Server::instance()->getPlayerMatch(Server::instance()->getPlayer(sender))->getId() == receiver) {
@@ -60,7 +65,13 @@ void Request::handle() {
 		}
 		else if (content == "get_plist") {
 			std::string response = "plist/";
-			//get player list from server
+			sf::Packet resp;
+			for (auto p : Server::instance()->getPlayersList()) {
+				response.append(std::to_string(p->getId()).append(";"));
+			}
+
+			resp << response;
+			Server::instance()->getPlayer(sender)->getClient()->send(resp);
 		}
 	}
 	else if (type == Type::MESSAGE) {

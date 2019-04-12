@@ -23,7 +23,7 @@ Response Response::parse(std::string container) {
 		else if (slashes == 1) contnt.push_back(c);
 	}
 
-	if (sType == "matched") eType = Type::Match;
+	if (sType == "match") eType = Type::Match;
 	else if (sType == "game_init") eType = Type::GameInit;
 	else if (sType == "game_update") eType = Type::GameUpdate;
 	else if (sType == "game_over") eType = Type::GameOver;

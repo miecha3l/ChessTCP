@@ -120,13 +120,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="client.cpp" />
+    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="source.cpp" />
     <ClCompile Include="CompressedPiece.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="Response.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Client.h" />
     <ClInclude Include="CompressedPiece.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="gui.h" />

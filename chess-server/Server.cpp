@@ -6,7 +6,7 @@
 Server* Server::obj = NULL;
 std::list<GameInstance*> gameInstances;
 std::map<Player*, GameInstance*> gameOf;
-extern Queue communicationQueue;
+extern Queue<sf::Packet> communicationQueue;
 
 
 Server::Server()
@@ -38,6 +38,7 @@ void Server::acceptClients() {
 		welcomemsg << std::to_string(players.back()->getId());
 		players.back()->getClient()->send(welcomemsg);
 		client = new sf::TcpSocket();
+		Sleep(200);
 	}
 }
 
@@ -102,7 +103,7 @@ void Server::updatePlayersAndGamesList() {
 			if (deleted) break;
 		}
 
-		Sleep(2000);
+		Sleep(200);
 	}
 }
 
@@ -113,9 +114,14 @@ void Server::handleMessages() {
 			sf::Packet msg = communicationQueue.pop();
 			msg >> container;
 
-			Request req = Request::parse(container);
-			if (req.isValid()) req.handle();
+			try {
+				Request req = Request::parse(container);
+				if (req.isValid()) req.handle();
+			}
+			catch (std::invalid_argument &e) {}
+			catch(...){}
 		}
+		Sleep(200);
 	}
 }
 
@@ -266,6 +272,10 @@ Player *Server::getPlayerMatch(Player *p) {
 void Server::matchPlayers(int a, int b){
 	matchOf[getPlayer(a)] = getPlayer(b);
 	matchOf[getPlayer(b)] = getPlayer(a);
+}
+
+std::list<Player*> Server::getPlayersList() {
+	return players;
 }
 
 Server::~Server()

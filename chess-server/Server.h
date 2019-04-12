@@ -17,6 +17,10 @@ private:
 	void updatePlayersAndGamesList();
 	void handleInput();
 	void printASCII();
+	void printPlayerList();
+	void printPlayerListWithInfo();
+	void printGameList();
+	int messagesCount();
 
 	sf::TcpSocket *client;
 	sf::TcpListener listener;
@@ -29,16 +33,13 @@ private:
 
 public:
 	static Server *instance();
-	
-	int playersCount();
-	int messagesCount();
 	void init();
-	void printPlayerList();
-	void printPlayerListWithInfo();
-	void printGameList();
+
+	int playersCount();
 	Player* getPlayer(int id);
 	void matchPlayers(int, int);
 	Player* getPlayerMatch(Player*);
+	std::list<Player*> getPlayersList();
 	~Server();
 };
 

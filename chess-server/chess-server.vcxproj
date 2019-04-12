@@ -132,7 +132,6 @@
     <ClCompile Include="piece.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="queen.cpp" />
-    <ClCompile Include="Queue.cpp" />
     <ClCompile Include="Request.cpp" />
     <ClCompile Include="rook.cpp" />
     <ClCompile Include="Server.cpp" />

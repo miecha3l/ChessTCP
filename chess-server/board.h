@@ -4,10 +4,36 @@
 #include <vector>
 #include "piece.h"
 
+/**
+  *\class Board
+  *\brief This class holds all data for engine to process.
+  *
+  *It is wrapper that holds pieces data, current state of the game and move stack and
+  *provides possibility to process this data in easy way.
+  *
+  */
 class Board{
 private:
+	/**
+	  *\brief This array represents gameboard that is understandable for an algorithm
+	  *
+	  *It basically holds set of integer which represents gameboard (1 is for black and 2 is for white).
+	  *Its job is to enable algoritm to determine if certain square is empty/can be captured.
+	  */
     int m_operationalBoard[8][8];
-	std::string currentTurn, currentFlag;
+
+	///Holds info about whoose turn it is.
+	std::string currentTurn;
+
+	/**
+	  *\brief Holds info about current gamestate.
+	  *
+	  *States can be: "check", "checkmate", "stalemate", "disconnected"
+	  *Its job is to communicate those states to client.
+	  */
+	std::string currentFlag;
+
+
 	std::string whiteTime, blackTime;
 
 public:
@@ -44,6 +70,9 @@ public:
 
 	/**
 	  *Allows engine to find piece by its coordinates
+	  *@param int x coordinate
+	  *@param int y coordinate
+	  *@return Piece on given coorinates
 	  */
 	Piece *getPieceWithCoords(int, int);
 
@@ -59,6 +88,7 @@ public:
 
 	/**
 	  *Sets current turn. Used to update game.
+	  *@param std::string new turn as string
 	  */
 	void setCurrentTurn(std::string);
 
@@ -75,6 +105,7 @@ public:
 
 	/**
 	  *Creates entire classic set of chess figures. Used to initialize gameboard, and prepare it for game.
+	  *@param std::string color what color to create set in
 	  */
 	void createClassicSet(std::string color);
 

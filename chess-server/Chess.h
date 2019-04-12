@@ -1,4 +1,9 @@
 #pragma once
+/**
+  *\brief Chess engine header file
+  *
+  *This header includes every file that is relevant to game engine.
+  */
 #include "piece.h"
 #include "pawn.h"
 #include "rook.h"

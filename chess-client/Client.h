@@ -30,12 +30,19 @@ private:
 	bool matchReq = false;
 	std::string requester;
 	bool matchAcc = false;
+	bool isReady = false;
+	bool isMatchReady = false;
 
 	void sendRequest();
 	void receiveResponse();
 	void handleResponse();
 
 public:
+	static enum Screen {
+		Menu,
+		Lobby,
+		Game
+	};
 	void init();
 	static Client *instance();
 	void addReqToQueue(std::string);
@@ -52,6 +59,15 @@ public:
 	void setMatchReq(bool);
 	void setMatchName(std::string);
 	void setRequester(std::string);
+	void setIsReady(bool);
+	bool isPlayerReady();
+	void setIsMatchReady(bool);
+	bool isPlayersMatchReady();
+	Screen getCurrentScreen();
+	void setCurrentScreen(Client::Screen);
 	GameState getGameState();
+
+private:
+	Screen currentScreen = Screen::Menu;
 };
 

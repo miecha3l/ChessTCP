@@ -22,21 +22,31 @@ Request::Request(Type t, std::string cont, std::string s, std::string r)
 void Request::handle() {
 	if (type == Type::REQUEST) {
 		if(content == "match"){
-			std::string msg = "match/";
-			msg.append(std::to_string(sender));
-			sf::Packet response;
-			response << msg;
-			Server::instance()->getPlayer(receiver)->getClient()->send(response);
+			if (Server::instance()->getPlayerMatch(Server::instance()->getPlayer(sender)) == NULL) {
+				std::string msg = "match/";
+				msg.append(std::to_string(sender));
+				sf::Packet response;
+				response << msg;
+				Server::instance()->getPlayer(receiver)->getClient()->send(response);
+			}
 		}
 		else if (content == "match_acc") {
-			Server::instance()->matchPlayers(sender, receiver);
-			sf::Packet resp;
-			resp << "match/acc";
-			Server::instance()->getPlayer(receiver)->getClient()->send(resp);
+			if (Server::instance()->getPlayerMatch(Server::instance()->getPlayer(sender)) == NULL) {
+				Server::instance()->matchPlayers(sender, receiver);
+				sf::Packet resp;
+				resp << "match/acc";
+				Server::instance()->getPlayer(receiver)->getClient()->send(resp);
+			}
 		}
 		else if (content == "match_dec") {
 			sf::Packet resp;
 			resp << "match/dec";
+			Server::instance()->getPlayer(receiver)->getClient()->send(resp);
+		}
+		else if (content == "is_ready" || content == "is_notready") {
+			sf::Packet resp;
+			std::string cont = "notification/";
+			resp << cont.append(content);
 			Server::instance()->getPlayer(receiver)->getClient()->send(resp);
 		}
 		else if (content == "play") {
@@ -50,17 +60,18 @@ void Request::handle() {
 
 				std::string initGs = gameInstances.back()->getCurrentGameState().parseGameStateToString();
 				sf::Packet resp;
-				std::string color = "game_init/white\\";
-				resp << color.append(initGs);
+				int ran = rand() % 2;
+				std::string colorA = ran == 1 ?"game_init/white\\" : "game_init/black\\";
+				std::string colorB = ran == 1 ?"game_init/black\\" : "game_init/white\\";
+				resp << colorA.append(initGs);
 				Server::instance()->getPlayer(sender)->getClient()->send(resp);
 				resp.clear();
-				color.clear();
+				colorA.clear();
 
-				color = "game_init/black\\";
-				resp << color.append(initGs);
+				resp << colorB.append(initGs);
 				Server::instance()->getPlayer(receiver)->getClient()->send(resp);
 				resp.clear();
-				color.clear();
+				colorB.clear();
 			}
 		}
 		else if (content == "get_plist") {

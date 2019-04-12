@@ -7,7 +7,7 @@ extern sf::RenderWindow client;
 
 Client::Client()
 {
-	ip = "192.168.8.130";
+	ip = "127.0.0.1";
 	port = 8888;
 	color = "";
 	matchName = "";
@@ -92,7 +92,12 @@ void Client::handleResponse() {
 				inGame = false;
 				gs = GameState("");
 				matchName.clear();
+				isMatchReady = false;
+				isReady = false;
 				color.clear();
+				currentScreen = Screen::Menu;
+				GuiManager::instance()->setMenuUI(true);
+				GuiManager::instance()->setLobbyUI(false);
 				serverConnection.setBlocking(false);
 				gameOverReason.clear();
 				break;
@@ -100,15 +105,17 @@ void Client::handleResponse() {
 			case Response::Type::Match:
 				if (response.handle() != "acc" && response.handle() != "dec") {
 					matchReq = true;
+					GuiManager::instance()->highlightPendingButton();
 					requester = response.handle();
 				}
 				if (response.handle() == "acc") {
-					std::cout << "match accepted" << std::endl;
-					matchReq = false;
-					matchName = requester;
-					std::string text = "Match: ";
-					matchNameLabel->setText(text.append(matchName));
-					requester.clear();
+					if (matchName.empty()) {
+						std::cout << "match accepted" << std::endl;
+						matchReq = false;
+						matchName = requester;
+						GuiManager::instance()->setInfoBoardInfo();
+						requester.clear();
+					}
 				}
 				if (response.handle() == "dec") {
 					matchReq = false;
@@ -116,6 +123,17 @@ void Client::handleResponse() {
 					requester.clear();
 				}
 				
+				break;
+
+			case Response::Type::Notification:
+				if (response.handle() == "is_notready") {
+					isMatchReady = false;
+					GuiManager::instance()->setInfoBoardInfo();
+				}
+				else if (response.handle() == "is_ready") {
+					isMatchReady = true;
+					GuiManager::instance()->setInfoBoardInfo();
+				}
 				break;
 
 			case Response::Type::Plist:
@@ -132,10 +150,6 @@ void Client::handleResponse() {
 				}
 				onlinePlayersUpToDate = true;
 				break;
-
-			/*case Response::Type::Notification:
-				std::cout << "notification: " << response.handle() << std::endl;
-				break;*/
 			}	
 		}
 		Sleep(250);
@@ -195,4 +209,34 @@ void Client::setMatchName(std::string n)
 void Client::setRequester(std::string r)
 {
 	requester = r;
+}
+
+void Client::setIsReady(bool s)
+{
+	isReady = s;
+}
+
+bool Client::isPlayerReady()
+{
+	return isReady;
+}
+
+void Client::setIsMatchReady(bool s)
+{
+	isMatchReady = s;
+}
+
+bool Client::isPlayersMatchReady()
+{
+	return isMatchReady;
+}
+
+Client::Screen Client::getCurrentScreen()
+{
+	return currentScreen;
+}
+
+void Client::setCurrentScreen(Client::Screen s)
+{
+	currentScreen = s;
 }

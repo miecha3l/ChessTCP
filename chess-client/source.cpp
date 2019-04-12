@@ -7,31 +7,18 @@
 #include <iostream>
 #include "Client.h"
 
-sf::VideoMode resolution(1000, 720);
+sf::VideoMode resolution(1000, 760);
 sf::RenderWindow client;
 sf::Texture bgForWhite;
 sf::Texture bgForBlack;
 sf::Texture splashArt;
-sf::Sprite logo;
+sf::Texture lobbyBg;
+sf::Sprite splash;
+sf::Sprite lobby;
 sf::Sprite background;
 std::string response;
 GameState gs;
 bool inGame;
-
-tgui::Gui gui{ client };
-tgui::VerticalLayout::Ptr layoutB;
-tgui::TextBox::Ptr inputUserName;
-tgui::Button::Ptr invButton;
-tgui::Button::Ptr playButton;
-tgui::Label::Ptr playerName;
-tgui::Label::Ptr matchNameLabel;
-tgui::ScrollablePanel::Ptr invitesPanel;
-tgui::Button::Ptr showInvites;
-
-tgui::Gui mainMenu{ client };
-tgui::VerticalLayout::Ptr layoutA;
-tgui::Button::Ptr playWithFriend;
-tgui::Button::Ptr playSolo;
 
 const int tileDims = 70;
 const int offset = 100;
@@ -47,8 +34,11 @@ void windowThread() {
 	CompressedPiece pieceSelected("not_found;00;;");
 	bgForWhite.loadFromFile("assets/backgroundWhite.png");
 	bgForBlack.loadFromFile("assets/backgroundBlack.png");
-	initGui();
-
+	splashArt.loadFromFile("assets/splash.png");
+	lobbyBg.loadFromFile("assets/lobbybg.png");
+	splash.setTexture(splashArt);
+	lobby.setTexture(lobbyBg);
+	GuiManager::instance()->init();
 
 	client.create(resolution, "Chess");
 	while (client.isOpen()) {
@@ -56,6 +46,7 @@ void windowThread() {
 			if (Client::instance()->getColor() == "white") background.setTexture(bgForWhite);
 			else if (Client::instance()->getColor() == "black") background.setTexture(bgForBlack);
 		}
+		
 		sf::Event evnt;
 		while (client.pollEvent(evnt)) {
 			if (evnt.type == sf::Event::Closed) client.close();
@@ -81,11 +72,13 @@ void windowThread() {
 					
 				}
 			}
-			gui.handleEvent(evnt);
+			GuiManager::instance()->getMainUIHandle()->handleEvent(evnt);
 		}
 
 		client.clear();
 		if (Client::instance()->isInGame()) {
+			GuiManager::instance()->setLobbyUI(false);
+			Client::instance()->setCurrentScreen(Client::Screen::Game);
 			client.draw(background);
 			if (isPieceSelected) {
 				drawLegalMoves(pieceSelected, Client::instance()->getColor());
@@ -94,7 +87,13 @@ void windowThread() {
 		}
 		else {
 			if (bgLoaded) bgLoaded = false;
-			gui.draw();
+			if (Client::instance()->getCurrentScreen() == Client::Screen::Menu) {
+				client.draw(splash);
+			}
+			else if (Client::instance()->getCurrentScreen() == Client::Screen::Lobby) {
+				client.draw(lobby);
+			}
+			GuiManager::instance()->getMainUIHandle()->draw();
 		}
 		client.display();
 	}

@@ -5,19 +5,52 @@
 
 extern sf::RenderWindow client;
 
-extern tgui::Gui mainMenu;
-extern tgui::VerticalLayout::Ptr layoutA;
-extern tgui::Button::Ptr playWithFriend;
-extern tgui::Button::Ptr playSolo;
+class GuiManager {
+private:
+	GuiManager();
+	static GuiManager *gm;
 
-extern tgui::Gui gui;
-void initGui();
-void getPlayerList();
-extern tgui::VerticalLayout::Ptr layoutB;
-extern tgui::Label::Ptr playerName;
-extern tgui::Label::Ptr matchNameLabel;
-extern tgui::TextBox::Ptr inputUserName;
-extern tgui::Button::Ptr invButton;
-extern tgui::Button::Ptr playButton;
-extern tgui::ScrollablePanel::Ptr invitesPanel;
-extern tgui::Button::Ptr showInvites;
+	tgui::Gui mainUI{ client };
+	tgui::VerticalLayout::Ptr mainUILayout;
+	tgui::Button::Ptr playSolo;
+	tgui::Button::Ptr playWithFriend;
+
+	tgui::Gui lobbyUI{ client };
+	tgui::VerticalLayout::Ptr lobbyUILayout;
+	tgui::HorizontalLayout::Ptr topRow;
+	tgui::HorizontalLayout::Ptr bottomRow;
+	tgui::Button::Ptr sendInvite;
+	tgui::Button::Ptr showInvites;
+	tgui::Panel::Ptr invitesPanel;
+	tgui::TextBox::Ptr inputUserName;
+	tgui::Panel::Ptr infoBoard;
+	tgui::Button::Ptr play;
+	tgui::CheckBox::Ptr isReady;
+
+
+	void inv();
+	void playReq();
+	void getPendingInvites();
+	void toggleReady();
+	
+
+
+	sf::Color lightBlue = sf::Color(219, 226, 229, 255);
+	sf::Color darkGrey = sf::Color(8, 7, 5, 255);
+	sf::Color blue = sf::Color(24, 25, 29, 255);
+	sf::Color darkBlue = sf::Color(125, 152, 161, 255);
+	sf::Color niceGreen = sf::Color(87, 181, 107, 255);
+	sf::Color darkerGreen = sf::Color(48, 99, 59, 255);
+	sf::Color niceRed = sf::Color(178, 50, 66, 255);
+	sf::Color darkerRed = sf::Color(130, 37, 49, 255);
+
+public:
+	static GuiManager* instance();
+	tgui::Gui* getMainUIHandle();
+	void highlightPendingButton();
+	void setInfoBoardInfo();
+	void setLobbyUI(bool);
+	void setMenuUI(bool);
+	void setInGameUI(bool);
+	void init();
+};

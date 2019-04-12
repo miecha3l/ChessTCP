@@ -130,9 +130,12 @@
     <ClCompile Include="knight.cpp" />
     <ClCompile Include="pawn.cpp" />
     <ClCompile Include="piece.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="queen.cpp" />
+    <ClCompile Include="Request.cpp" />
     <ClCompile Include="rook.cpp" />
     <ClCompile Include="Server.cpp" />
+    <ClCompile Include="ServerSource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bishop.h" />
@@ -146,7 +149,12 @@
     <ClInclude Include="knight.h" />
     <ClInclude Include="pawn.h" />
     <ClInclude Include="piece.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="queen.h" />
+    <ClInclude Include="Queue.h" />
+    <ClInclude Include="Request.h" />
+    <ClInclude Include="rook.h" />
+    <ClInclude Include="Server.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

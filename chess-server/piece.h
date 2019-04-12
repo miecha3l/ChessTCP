@@ -1,5 +1,5 @@
 #pragma once
-#include "SFML/Graphics.hpp"
+#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <list>
 
@@ -61,23 +61,68 @@ public:
 //virtual methods
 public:
     
+	/**
+	  *This method is unique for every piece. It iteratively searches for every legal move that piece can make.
+	  */
     virtual void findLegalMoves(Board b) = 0;
     
 
 //public methods
 public:
-    void pushMove(Move, Board&);
-    void undoMove(Move, Board&);
-	void eraseMove(Move);
-    Piece();
-    sf::Vector2i getBoardPosition();
-    sf::Vector2f getScreenPosition();
-    void setBoardPosition(sf::Vector2i);
-    void setScreenPosition(sf::Vector2f);
-    bool validateMove(Move&, Board &b);
-	std::string getName();
+	/**
+	  *ensures that move can be made, removes knocked pieces
+	  */
+	bool validateMove(Move&, Board &b);
 
-	void showPieceInfo();
+
+	/**
+	  *finalizes move, make changes to gameboard
+	  */
+    void pushMove(Move, Board&);
+
+
+	/**
+	  *undo changes made by pushMove()
+	  */
+    void undoMove(Move, Board&);
+
+	/**
+	  *remove move from legalMoves
+	  */
+	void eraseMove(Move);
+
+	/**
+	  *default constructor
+	  */
+    Piece();
+
+
+	/**
+	  *returns board position 
+	  */
+    sf::Vector2i getBoardPosition();
+
+
+	/**
+	  *returns screeen postion
+	  */
+    sf::Vector2f getScreenPosition();
+
+
+	/**
+	  *sets board position
+	  */
+    void setBoardPosition(sf::Vector2i);
+
+	/**
+	  *sets screen position
+	  */
+    void setScreenPosition(sf::Vector2f);
+    
+	/**
+	  *returns pieces name
+	  */
+	std::string getName();
 
     friend class Board;
 	friend struct Player;

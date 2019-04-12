@@ -17,23 +17,66 @@ public:
 
 
 public:
+	/**
+	  *Default constructor
+	  */
     Board();
+
+	/**
+	  *Adds new piece to the board
+	  */
     void addPiece(Piece *p);
+
+	/**
+	  *Debug method. Prints abstract board of integers to ilustrate whats going on under the hood.
+	  */
     void showOperationalBoard();
+
+	/**
+	  *Returns pointer of type Piece* to white king
+	  */
     Piece *getWhiteKing();
+
+	/**
+	  *Returns pointer of type Piece* to black king
+	  */
     Piece *getBlackKing();
+
+	/**
+	  *Allows engine to find piece by its coordinates
+	  */
 	Piece *getPieceWithCoords(int, int);
-	void setWhiteTime(std::string);
+
+	/**
+	  *Returns time that white has left this game (may be removed)
+	  */
 	std::string getWhiteTime();
-	void setBlackTime(std::string);
+
+	/**
+	  *Returns time that black has left this game (may be removed)
+	  */
 	std::string getBlackTime();
+
+	/**
+	  *Sets current turn. Used to update game.
+	  */
 	void setCurrentTurn(std::string);
+
+	/**
+	  *Returns string "black" or "white" which indicate whose turn is it.
+	  */
 	std::string getCurrentTurn();
+
+	/**
+	  *Returns current flag such as "check", "checkmate", "stalemate", "timeout", "forfeit".
+	  *Method not completed neither used yet.
+	  */
 	std::string getCurrentFlag();
-	void setCurrentFlag(std::string);
 
-	//static void undoLastMove(Board &b);
-
+	/**
+	  *Creates entire classic set of chess figures. Used to initialize gameboard, and prepare it for game.
+	  */
+	void createClassicSet(std::string color);
 
     friend class Piece;
     friend class Rook;

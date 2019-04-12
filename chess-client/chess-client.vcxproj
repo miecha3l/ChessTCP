@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Michal\source\repos\chess-server\TGUI-0.8\include;C:\Users\Michal\source\repos\chess-server\SFML-2.5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Michal\source\repos\chess-server\chess-server;C:\Users\Michal\source\repos\chess-server\TGUI-0.8\include;C:\Users\Michal\source\repos\chess-server\SFML-2.5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\Users\Michal\source\repos\chess-server\TGUI-0.8\lib;C:\Users\Michal\source\repos\chess-server\SFML-2.5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -120,16 +120,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="client.cpp" />
+    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="source.cpp" />
     <ClCompile Include="CompressedPiece.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="gui.cpp" />
+    <ClCompile Include="Response.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Chess.h" />
+    <ClInclude Include="Client.h" />
     <ClInclude Include="CompressedPiece.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="gui.h" />
+    <ClInclude Include="Response.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

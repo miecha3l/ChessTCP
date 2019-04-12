@@ -7,7 +7,7 @@ extern sf::RenderWindow client;
 
 Client::Client()
 {
-	ip = "127.0.0.1";
+	ip = "192.168.8.130";
 	port = 8888;
 	color = "";
 	matchName = "";
@@ -25,10 +25,11 @@ void Client::init() {
 	sf::Thread handle(&Client::handleResponse, this);
 
 	sf::Packet initial;
+	std::cout << "connecting with server at: " << ip << std::endl;
 	serverConnection.connect(ip, port);
 	serverConnection.receive(initial);
 	initial >> playerName;
-	std::cout << "Welcome: " << playerName;
+	std::cout << "connection accomplished" << std::endl;
 	serverConnection.setBlocking(false);
 
 	send.launch();
@@ -131,6 +132,10 @@ void Client::handleResponse() {
 				}
 				onlinePlayersUpToDate = true;
 				break;
+
+			/*case Response::Type::Notification:
+				std::cout << "notification: " << response.handle() << std::endl;
+				break;*/
 			}	
 		}
 		Sleep(250);

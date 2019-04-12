@@ -37,16 +37,17 @@ void getPlayerList() {
 
 		for (auto p : Client::instance()->getOnlinePlayersList()) {
 			if (p == Client::instance()->getName()) continue;
-			auto playersLabel = tgui::Label::create();
-			invitesPanel->add(playersLabel);
-			int yPos = (invitesPanel->getWidgets().size() - 1) * 25;
-			playersLabel->setSize("45%", 25);
-			playersLabel->setPosition("0%", yPos);
-			playersLabel->getRenderer()->setTextColor(lightBlue);
-			playersLabel->setTextSize(13);
-			playersLabel->setText(p);
-
 			if (Client::instance()->getRequester() == p) {
+				auto playersLabel = tgui::Label::create();
+				invitesPanel->add(playersLabel);
+				int yPos = (invitesPanel->getWidgets().size() - 1) * 25;
+				playersLabel->setSize("45%", 25);
+				playersLabel->setPosition("0%", yPos);
+				playersLabel->getRenderer()->setTextColor(lightBlue);
+				playersLabel->setTextSize(13);
+				playersLabel->setText(p);
+
+			
 				auto acceptButton = tgui::Button::create();
 				invitesPanel->add(acceptButton);
 				acceptButton->setSize("25%", 25);
@@ -59,7 +60,6 @@ void getPlayerList() {
 				acceptButton->getRenderer()->setBackgroundColorDown(darkBlue);
 				acceptButton->getRenderer()->setBorderColor(darkBlue);
 				acceptButton->setTextSize(13);
-
 				acceptButton->connect("pressed", [&]() {
 					std::string msg = "req/match_acc/";
 					Client::instance()->setMatchAcc(true);

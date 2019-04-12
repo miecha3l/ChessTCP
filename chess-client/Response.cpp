@@ -28,6 +28,7 @@ Response Response::parse(std::string container) {
 	else if (sType == "game_update") eType = Type::GameUpdate;
 	else if (sType == "game_over") eType = Type::GameOver;
 	else if (sType == "plist") eType = Type::Plist;
+	else if (sType == "notification") eType = Type::Notification;
 	else eType = Type::Other;
 
 	return Response(eType, contnt);

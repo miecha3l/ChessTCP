@@ -10,6 +10,7 @@ public:
 		Match,
 		GameUpdate,
 		GameOver,
+		Notification,
 		Other
 	};
 	Response(Type, std::string);

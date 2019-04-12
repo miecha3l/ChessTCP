@@ -19,13 +19,20 @@ GameState gs;
 bool inGame;
 
 tgui::Gui gui{ client };
+tgui::VerticalLayout::Ptr layoutB;
 tgui::TextBox::Ptr inputUserName;
 tgui::Button::Ptr invButton;
 tgui::Button::Ptr playButton;
 tgui::Label::Ptr playerName;
 tgui::Label::Ptr matchNameLabel;
 tgui::ScrollablePanel::Ptr invitesPanel;
-tgui::Button::Ptr refresh;
+tgui::Button::Ptr showInvites;
+
+tgui::Gui mainMenu{ client };
+tgui::VerticalLayout::Ptr layoutA;
+tgui::Button::Ptr playWithFriend;
+tgui::Button::Ptr playSolo;
+
 const int tileDims = 70;
 const int offset = 100;
 

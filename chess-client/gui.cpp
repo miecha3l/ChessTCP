@@ -105,10 +105,16 @@ void initGui() {
 	tgui::Theme theme("themes/TransparentGrey.txt");
 	tgui::Theme::setDefault(&theme);
 
+	layoutB = tgui::VerticalLayout::create();
+	gui.add(layoutB);
+	layoutB->setSize(300, 600);
+	layoutB->setPosition(50, 150);
+	layoutB->getRenderer()->setSpaceBetweenWidgets(30);
+
 	invButton = tgui::Button::create();
 	gui.add(invButton);
-	invButton->setSize(200, 40);
-	invButton->setPosition(750, 100);
+	layoutB->add(invButton);
+	invButton->setSize("100%", 40);
 	invButton->setTextSize(20);
 	invButton->getRenderer()->setTextColor(darkGrey);
 	invButton->getRenderer()->setTextColorDown(lightBlue);
@@ -122,8 +128,8 @@ void initGui() {
 
 	playButton = tgui::Button::create();
 	gui.add(playButton);
-	playButton->setSize(200, 40);
-	playButton->setPosition(750, 850);
+	layoutB->add(playButton);
+	playButton->setSize("100%", 40);
 	playButton->setTextSize(20);
 	playButton->setText("Play");
 	playButton->getRenderer()->setTextColor(darkGrey);
@@ -135,9 +141,9 @@ void initGui() {
 	playButton->connect("pressed", &play);
 
 	inputUserName = tgui::TextBox::create();
+	layoutB->add(inputUserName);
 	gui.add(inputUserName);
-	inputUserName->setSize(650, 40);
-	inputUserName->setPosition(50, 100);
+	inputUserName->setSize("100%", 40);
 	inputUserName->setTextSize(21);
 	inputUserName->getRenderer()->setBorders(2);
 	inputUserName->getRenderer()->setBorderColor(darkBlue);
@@ -160,24 +166,24 @@ void initGui() {
 	std::string textm = "Match: ";
 	matchNameLabel->setText(textm.append("none"));
 
-	refresh = tgui::Button::create();
-	gui.add(refresh);
-	refresh->setSize(200, 40);
-	refresh->setPosition(50, 150);
-	refresh->setText("Invites");
-	refresh->setTextSize(20);
-	refresh->getRenderer()->setTextColor(darkGrey);
-	refresh->getRenderer()->setTextColorDown(lightBlue);
-	refresh->getRenderer()->setBackgroundColor(lightBlue);
-	refresh->getRenderer()->setBackgroundColorHover(darkBlue);
-	refresh->getRenderer()->setBackgroundColorDown(darkBlue);
-	refresh->getRenderer()->setBorderColor(darkBlue);
-	refresh->connect("pressed", &getPlayerList);
+	showInvites = tgui::Button::create();
+	gui.add(showInvites);
+	layoutB->add(showInvites);
+	showInvites->setSize("100%", 40);
+	showInvites->setText("Invites");
+	showInvites->setTextSize(20);
+	showInvites->getRenderer()->setTextColor(darkGrey);
+	showInvites->getRenderer()->setTextColorDown(lightBlue);
+	showInvites->getRenderer()->setBackgroundColor(lightBlue);
+	showInvites->getRenderer()->setBackgroundColorHover(darkBlue);
+	showInvites->getRenderer()->setBackgroundColorDown(darkBlue);
+	showInvites->getRenderer()->setBorderColor(darkBlue);
+	showInvites->connect("pressed", &getPlayerList);
 
 	invitesPanel = tgui::ScrollablePanel::create();
 	gui.add(invitesPanel);
 	invitesPanel->setSize(200, 100);
-	invitesPanel->setPosition(50, 190);
+	invitesPanel->setPosition(showInvites->getPosition().x, showInvites->getPosition().y + showInvites->getPosition().y + 10);
 	invitesPanel->getRenderer()->setBackgroundColor(blue);
 	invitesPanel->setVisible(false);
 	invitesPanel->setEnabled(false);

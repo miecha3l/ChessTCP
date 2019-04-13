@@ -120,7 +120,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bishop.cpp" />
+    <ClCompile Include="board.cpp" />
+    <ClCompile Include="BoardAnalisys.cpp" />
+    <ClCompile Include="ChessBot.cpp" />
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="king.cpp" />
+    <ClCompile Include="knight.cpp" />
+    <ClCompile Include="pawn.cpp" />
+    <ClCompile Include="piece.cpp" />
+    <ClCompile Include="queen.cpp" />
+    <ClCompile Include="rook.cpp" />
+    <ClCompile Include="SoloGame.cpp" />
     <ClCompile Include="source.cpp" />
     <ClCompile Include="CompressedPiece.cpp" />
     <ClCompile Include="GameState.cpp" />
@@ -128,11 +139,22 @@
     <ClCompile Include="Response.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bishop.h" />
+    <ClInclude Include="board.h" />
+    <ClInclude Include="BoardAnalisys.h" />
+    <ClInclude Include="Chess.h" />
+    <ClInclude Include="ChessBot.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="CompressedPiece.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="gui.h" />
+    <ClInclude Include="king.h" />
+    <ClInclude Include="knight.h" />
+    <ClInclude Include="pawn.h" />
+    <ClInclude Include="queen.h" />
     <ClInclude Include="Response.h" />
+    <ClInclude Include="rook.h" />
+    <ClInclude Include="SoloGame.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

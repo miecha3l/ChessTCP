@@ -183,6 +183,7 @@ void Server::printASCII() {
 	std::cout << R"(                    ____) | |____| | \ \  \  /  | |____| | \ \ )" << std::endl;
 	std::cout << R"(                   |_____/|______|_|  \_\  \/   |______|_|  \_\)" << std::endl;
 	std::cout << R"(                   --------------v1.0 by miecha3l--------------)" << std::endl;
+	std::cout << R"(                            type "?" to see help info          )" << std::endl;
 }
 
 void Server::init() {

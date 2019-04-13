@@ -26,6 +26,7 @@ private:
 	tgui::Panel::Ptr infoBoard;
 	tgui::Button::Ptr play;
 	tgui::CheckBox::Ptr isReady;
+	
 
 
 	void inv();
@@ -34,7 +35,8 @@ private:
 	void toggleReady();
 	
 
-
+	sf::Font latoDefault;
+	sf::Font latoBold;
 	sf::Color lightBlue = sf::Color(219, 226, 229, 255);
 	sf::Color darkGrey = sf::Color(8, 7, 5, 255);
 	sf::Color blue = sf::Color(24, 25, 29, 255);
@@ -49,6 +51,7 @@ public:
 	tgui::Gui* getMainUIHandle();
 	void highlightPendingButton();
 	void setInfoBoardInfo();
+	void setIsReady(bool);
 	void setLobbyUI(bool);
 	void setMenuUI(bool);
 	void setInGameUI(bool);

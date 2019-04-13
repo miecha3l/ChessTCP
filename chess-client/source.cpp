@@ -3,9 +3,11 @@
 #include "Chess.h"
 #include "gui.h"
 #include "GameState.h"
-#include "Response.h";
+#include "Response.h"
+#include "ChessBot.h"
 #include <iostream>
 #include "Client.h"
+#include "SoloGame.h"
 
 sf::VideoMode resolution(1000, 760);
 sf::RenderWindow client;
@@ -17,8 +19,11 @@ sf::Sprite splash;
 sf::Sprite lobby;
 sf::Sprite background;
 std::string response;
-GameState gs;
-bool inGame;
+SoloGame game;
+
+
+
+bool boardRefreshed = false;
 
 const int tileDims = 70;
 const int offset = 100;
@@ -47,15 +52,30 @@ void windowThread() {
 			else if (Client::instance()->getColor() == "black") background.setTexture(bgForBlack);
 		}
 		
+		//solo game stuff
+		if (Client::instance()->getCurrentScreen() == Client::Screen::SoloGame) {
+			if (!game.isInitialized()) {
+				game = SoloGame(Client::instance()->getColor());
+				game.turnChecks();
+			}
+			else if (!game.turnChecksDone()) {
+				game.turnChecks();
+				if (game.getCurrentTurn() != Client::instance()->getColor()) {
+					game.botMove();
+				}
+			}
+		}
+
+
+
 		sf::Event evnt;
 		while (client.pollEvent(evnt)) {
 			if (evnt.type == sf::Event::Closed) client.close();
 
-			//player creating response
+			//online game events
 			if (evnt.type == sf::Event::MouseButtonPressed && Client::instance()->getGameState().getCurrentGameTurn() == Client::instance()->getColor() && Client::instance()->isInGame()) {
 				if (isPieceSelected && pieceSelected.name != "not_found") {
 					int moveId = getClickedMove(pieceSelected, Client::instance()->getColor());
-					std::cout << moveId << std::endl;
 					if (moveId > 0) {
 						std::string type = "game_req/";
 						Client::instance()->addReqToQueue(type.append(std::to_string(moveId)).append("/").append(Client::instance()->getName()).append("/").append(Client::instance()->getMatchName()));
@@ -69,7 +89,25 @@ void windowThread() {
 				}
 				else {
 					isPieceSelected = false;
-					
+				}
+			}
+
+			//solo game events
+			if (evnt.type == sf::Event::MouseButtonPressed && Client::instance()->getColor() == game.getCurrentTurn() && Client::instance()->getCurrentScreen() == Client::Screen::SoloGame) {
+				if (isPieceSelected && pieceSelected.name != "not_found") {
+					int moveId = getClickedMove(pieceSelected, Client::instance()->getColor());
+					if (moveId > 0) {
+						game.getPlayersMove(moveId);
+					}
+				}
+				
+				CompressedPiece piece = getPieceClicked(client, Client::instance()->getGameState(), Client::instance()->getColor());
+				pieceSelected = piece;
+				if (piece.name != "not_found") {
+					isPieceSelected = true;
+				}
+				else {
+					isPieceSelected = false;
 				}
 			}
 			GuiManager::instance()->getMainUIHandle()->handleEvent(evnt);
@@ -78,23 +116,45 @@ void windowThread() {
 		client.clear();
 		if (Client::instance()->isInGame()) {
 			GuiManager::instance()->setLobbyUI(false);
-			Client::instance()->setCurrentScreen(Client::Screen::Game);
+			Client::instance()->setCurrentScreen(Client::Screen::OnlineGame);
 			client.draw(background);
 			if (isPieceSelected) {
 				drawLegalMoves(pieceSelected, Client::instance()->getColor());
 			}
 			drawGameState(Client::instance()->getGameState(), client, Client::instance()->getColor());
 		}
+
+
+
 		else {
+
 			if (bgLoaded) bgLoaded = false;
+
+
 			if (Client::instance()->getCurrentScreen() == Client::Screen::Menu) {
 				client.draw(splash);
 			}
+
+
 			else if (Client::instance()->getCurrentScreen() == Client::Screen::Lobby) {
 				client.draw(lobby);
 			}
+
+
+			else if (Client::instance()->getCurrentScreen() == Client::Screen::SoloGame) {
+				client.draw(background);
+				if (game.getCurrentTurn() != Client::instance()->getColor()) {
+					isPieceSelected = false;
+					pieceSelected = CompressedPiece("not_found;00;;");
+				}
+				if (isPieceSelected) drawLegalMoves(pieceSelected, Client::instance()->getColor());
+				drawGameState(Client::instance()->getGameState(), client, Client::instance()->getColor());
+			}
 			GuiManager::instance()->getMainUIHandle()->draw();
 		}
+
+
+
 		client.display();
 	}
 }

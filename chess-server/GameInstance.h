@@ -14,6 +14,7 @@ private:
 	Board gameBoard;
 
 public:
+	GameInstance();
 	GameInstance(Player*, Player*);
 	~GameInstance();
 	bool hasPlayer(Player*);
@@ -21,6 +22,7 @@ public:
 	int getId();
 	Player *getWhite();
 	Player *getBlack();
+	Board getBoard();
 	GameState updateGameInstance(int);
 	GameState getCurrentGameState();
 };

@@ -4,19 +4,19 @@ GameState::GameState()
 {
 }
 
-//GameState::GameState(Board gameBoard) {
-//	whiteTimeLeft = gameBoard.getWhiteTime();
-//	blackTimeLeft = gameBoard.getBlackTime();
-//	currentGameTurn = gameBoard.getCurrentTurn();
-//	currentFlag = gameBoard.getCurrentFlag();
-//
-//	for (auto p : gameBoard.white_pieces) {
-//		whitePieces.push_back(CompressedPiece(p->getName(), p->getBoardPosition(), p->legalMoves));
-//	}
-//	for (auto p : gameBoard.black_pieces) {
-//		blackPieces.push_back(CompressedPiece(p->getName(), p->getBoardPosition(), p->legalMoves));
-//	}
-//}
+GameState::GameState(Board gameBoard) {
+	whiteTimeLeft = gameBoard.getWhiteTime();
+	blackTimeLeft = gameBoard.getBlackTime();
+	currentGameTurn = gameBoard.getCurrentTurn();
+	currentFlag = gameBoard.getCurrentFlag();
+
+	for (auto p : gameBoard.white_pieces) {
+		whitePieces.push_back(CompressedPiece(p->getName(), p->getBoardPosition(), p->legalMoves));
+	}
+	for (auto p : gameBoard.black_pieces) {
+		blackPieces.push_back(CompressedPiece(p->getName(), p->getBoardPosition(), p->legalMoves));
+	}
+}
 
 GameState::GameState(std::string gameStateAsString) {
 	std::string currentPart = "";

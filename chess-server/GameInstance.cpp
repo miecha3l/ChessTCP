@@ -1,4 +1,15 @@
 #include "GameInstance.h"
+GameInstance::GameInstance() {
+	ID = rand() % 94924895 + 3412;
+	firstTurn = true;
+	white = NULL;
+	black = NULL;
+	gameBoard.createClassicSet("white");
+	gameBoard.createClassicSet("black");
+	for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
+	for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
+}
+
 GameInstance::GameInstance(Player *w, Player *b) {
 	ID = rand() % 94924895 + 3412;
 	firstTurn = true;
@@ -78,4 +89,9 @@ Player * GameInstance::getWhite()
 Player * GameInstance::getBlack()
 {
 	return black;
+}
+
+Board GameInstance::getBoard()
+{
+	return gameBoard;
 }

@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\engine_headers">
+      <UniqueIdentifier>{0b399401-fde2-477e-9f6a-8ec13420ffcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\engine_source">
+      <UniqueIdentifier>{7f9fed28-720a-4933-868e-74848e6304af}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CompressedPiece.cpp">
@@ -33,6 +39,39 @@
     <ClCompile Include="Client.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ChessBot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoloGame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bishop.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="board.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="BoardAnalisys.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="king.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="knight.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="pawn.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="piece.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="queen.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="rook.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CompressedPiece.h">
@@ -49,6 +88,39 @@
     </ClInclude>
     <ClInclude Include="Client.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChessBot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoloGame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Chess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bishop.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="board.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="BoardAnalisys.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="king.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="knight.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pawn.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="queen.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="rook.h">
+      <Filter>Header Files\engine_headers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

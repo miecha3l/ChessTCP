@@ -54,6 +54,8 @@ void Client::sendRequest() {
 			std::cout << "Req: " << raw << std::endl;
 			req << raw;
 			serverConnection.send(req);
+			Sleep(250);
+			GuiManager::instance()->setIsReady(true);
 		}
 		Sleep(250);
 	}
@@ -164,6 +166,11 @@ GameState Client::getGameState() {
 	return gs;
 }
 
+void Client::setGameState(Board b)
+{
+	gs = GameState(b);
+}
+
 bool Client::isInGame() { return inGame; }
 
 std::list<std::string> Client::getOnlinePlayersList()
@@ -239,4 +246,9 @@ Client::Screen Client::getCurrentScreen()
 void Client::setCurrentScreen(Client::Screen s)
 {
 	currentScreen = s;
+}
+
+void Client::setColor(std::string c)
+{
+	color = c;
 }

@@ -17,6 +17,7 @@ void GuiManager::playReq() {
 	if (!Client::instance()->getMatchName().empty()) {
 		if (Client::instance()->isPlayerReady() && Client::instance()->isPlayersMatchReady()) {
 			Client::instance()->addReqToQueue(body.append(Client::instance()->getMatchName()).append("/").append(Client::instance()->getName()));
+			setLobbyUI(false);
 		}
 	}
 }
@@ -52,6 +53,11 @@ void GuiManager::setInfoBoardInfo()
 	playerLabel->setTextSize(28);
 	playerLabel->getRenderer()->setTextColor(niceRed);
 	if (Client::instance()->isPlayerReady()) playerLabel->getRenderer()->setTextColor(darkerGreen);
+}
+
+void GuiManager::setIsReady(bool s)
+{
+	isReady->setEnabled(s);
 }
 
 void GuiManager::setLobbyUI(bool s)
@@ -153,11 +159,16 @@ void GuiManager::toggleReady()
 	setInfoBoardInfo();
 	std::string req = isReady->isChecked() ? "req/is_ready/" : "req/is_notready/";
 	Client::instance()->addReqToQueue(req.append(Client::instance()->getMatchName()).append("/").append(Client::instance()->getName()));
+	isReady->setEnabled(false);
 }
 
 
 
 GuiManager::GuiManager() {
+
+	latoBold.loadFromFile("assets/Lato-Bold.ttf");
+	latoDefault.loadFromFile("assets/Lato-Regular.ttf");
+
 	//main UI init
 	mainUILayout = tgui::VerticalLayout::create();
 	playSolo = tgui::Button::create();
@@ -224,7 +235,7 @@ void GuiManager::init()
 
 	//main UI setup
 	mainUILayout->setSize(300, 160);
-	mainUILayout->setPosition( 350, 650 );
+	mainUILayout->setPosition( 350, 500 );
 	mainUILayout->getRenderer()->setSpaceBetweenWidgets(30);
 
 
@@ -232,21 +243,23 @@ void GuiManager::init()
 	playSolo->setText("PLAY SOLO");
 	playSolo->setTextSize(22);
 	playSolo->getRenderer()->setTextColor(darkGrey);
-	playSolo->getRenderer()->setTextStyle(sf::Text::Bold);
+	playSolo->getRenderer()->setFont(latoBold);
 	playSolo->getRenderer()->setTextColorDown(lightBlue);
 	playSolo->getRenderer()->setBackgroundColor(lightBlue);
 	playSolo->getRenderer()->setBackgroundColorHover(darkBlue);
 	playSolo->getRenderer()->setBackgroundColorDown(darkBlue);
 	playSolo->getRenderer()->setBorderColor(darkBlue);
 	playSolo->connect("pressed", [&]() {
-		//switch screen to solo game settings
+		Client::instance()->setCurrentScreen(Client::Screen::SoloGame);
+		Client::instance()->setColor("white");
+		setMenuUI(false);
 	});
 
 	playWithFriend->setSize( "100%", "40%" );
 	playWithFriend->setText("PLAY WITH FRIEND");
 	playWithFriend->setTextSize(22);
 	playWithFriend->getRenderer()->setTextColor(darkGrey);
-	playWithFriend->getRenderer()->setTextStyle(sf::Text::Bold);
+	playWithFriend->getRenderer()->setFont(latoBold);
 	playWithFriend->getRenderer()->setTextColorDown(lightBlue);
 	playWithFriend->getRenderer()->setBackgroundColor(lightBlue);
 	playWithFriend->getRenderer()->setBackgroundColorHover(darkBlue);
@@ -273,6 +286,7 @@ void GuiManager::init()
 
 	inputUserName->setSize("30%", "100%");
 	inputUserName->setTextSize(30);
+	inputUserName->getRenderer()->setFont(latoDefault);
 	inputUserName->getRenderer()->setBorders(2);
 	inputUserName->getRenderer()->setBorderColor(darkBlue);
 	inputUserName->getRenderer()->setBackgroundColor(lightBlue);
@@ -282,6 +296,7 @@ void GuiManager::init()
 	sendInvite->setSize("30%", "100%");
 	sendInvite->setTextSize(20);
 	sendInvite->getRenderer()->setTextColor(darkGrey);
+	sendInvite->getRenderer()->setFont(latoDefault);
 	sendInvite->getRenderer()->setTextColorDown(lightBlue);
 	sendInvite->getRenderer()->setBackgroundColor(lightBlue);
 	sendInvite->getRenderer()->setBackgroundColorHover(darkBlue);
@@ -293,6 +308,7 @@ void GuiManager::init()
 	showInvites->setSize("35%", "100%");
 	showInvites->setTextSize(20);
 	showInvites->getRenderer()->setTextColor(darkGrey);
+	showInvites->getRenderer()->setFont(latoDefault);
 	showInvites->getRenderer()->setTextColorDown(lightBlue);
 	showInvites->getRenderer()->setBackgroundColor(lightBlue);
 	showInvites->getRenderer()->setBackgroundColorHover(darkBlue);
@@ -303,12 +319,14 @@ void GuiManager::init()
 
 	invitesPanel->setSize("100%", "5%");
 	invitesPanel->setPosition("0%", "7%");
+	invitesPanel->getRenderer()->setFont(latoDefault);
 	invitesPanel->getRenderer()->setBackgroundColor(darkBlue);
 	invitesPanel->setVisible(false);
 	invitesPanel->setEnabled(false);
 
 	infoBoard->setSize("100%", "40%");
 	infoBoard->setPosition("0%", "25%");
+	infoBoard->getRenderer()->setFont(latoDefault);
 	infoBoard->getRenderer()->setBackgroundColor(darkBlue);
 	infoBoard->getRenderer()->setBorders(4);
 	infoBoard->getRenderer()->setBorderColor(darkGrey);
@@ -317,11 +335,11 @@ void GuiManager::init()
 	play->setSize("70%", "40%");
 	play->setPosition("8%", "30%");
 	play->setTextSize(25);
+	play->getRenderer()->setFont(latoBold);
 	play->getRenderer()->setBackgroundColor(niceGreen);
 	play->getRenderer()->setBackgroundColorHover(darkerGreen);
 	play->getRenderer()->setBackgroundColorDown(darkerGreen);
 	play->getRenderer()->setTextColor(lightBlue);
-	play->getRenderer()->setTextStyle(sf::Text::Bold);
 	play->setText("P L A Y");
 	play->connect("pressed", &GuiManager::playReq, this);
 

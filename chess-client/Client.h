@@ -41,8 +41,10 @@ public:
 	static enum Screen {
 		Menu,
 		Lobby,
-		Game
+		OnlineGame,
+		SoloGame
 	};
+
 	void init();
 	static Client *instance();
 	void addReqToQueue(std::string);
@@ -65,7 +67,9 @@ public:
 	bool isPlayersMatchReady();
 	Screen getCurrentScreen();
 	void setCurrentScreen(Client::Screen);
+	void setColor(std::string);
 	GameState getGameState();
+	void setGameState(Board b);
 
 private:
 	Screen currentScreen = Screen::Menu;

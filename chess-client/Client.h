@@ -5,6 +5,7 @@
 #include "GameState.h"
 #include <iostream>
 #include <list>
+#include "SoloGame.h"
 class Client
 {
 private:
@@ -18,6 +19,7 @@ private:
 	int port;
 	sf::TcpSocket serverConnection;
 	GameState gs;
+	SoloGame game;
 	std::string playerName;
 	std::string matchName;
 	std::string color;
@@ -42,7 +44,7 @@ public:
 		Menu,
 		Lobby,
 		OnlineGame,
-		SoloGame
+		OfflineGame
 	};
 
 	void init();
@@ -70,6 +72,9 @@ public:
 	void setColor(std::string);
 	GameState getGameState();
 	void setGameState(Board b);
+	void resetSoloGame();
+	SoloGame *getSoloGameInstance();
+	void initSoloGame();
 
 private:
 	Screen currentScreen = Screen::Menu;

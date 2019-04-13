@@ -171,6 +171,22 @@ void Client::setGameState(Board b)
 	gs = GameState(b);
 }
 
+void Client::resetSoloGame()
+{
+	game = SoloGame();
+}
+
+SoloGame *Client::getSoloGameInstance()
+{
+	SoloGame *instance = &game;
+	return instance;
+}
+
+void Client::initSoloGame()
+{
+	game = SoloGame(color);
+}
+
 bool Client::isInGame() { return inGame; }
 
 std::list<std::string> Client::getOnlinePlayersList()

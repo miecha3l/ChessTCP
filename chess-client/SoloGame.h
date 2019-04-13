@@ -17,7 +17,7 @@ public:
 	SoloGame(std::string);
 	void getPlayersMove(int moveId);
 	void botMove();
-	void turnChecks();
+	bool turnChecks();
 	bool turnChecksDone();
 	bool isFirstTurn();
 	bool isInitialized();

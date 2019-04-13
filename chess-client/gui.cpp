@@ -72,6 +72,12 @@ void GuiManager::setMenuUI(bool s)
 	mainUILayout->setVisible(s);
 }
 
+void GuiManager::setInGameUI(bool s)
+{
+	soloGameLayout->setEnabled(s);
+	soloGameLayout->setVisible(s);
+}
+
 void GuiManager::getPendingInvites() {
 	showInvites->getRenderer()->setBackgroundColor(lightBlue);
 	showInvites->getRenderer()->setBorderColor(darkBlue);
@@ -188,6 +194,7 @@ GuiManager::GuiManager() {
 	invitesPanel = tgui::Panel::create();
 	inputUserName = tgui::TextBox::create();
 	infoBoard = tgui::Panel::create();
+	backToMenu = tgui::Button::create();
 	play = tgui::Button::create();
 	isReady = tgui::CheckBox::create();
 
@@ -195,8 +202,9 @@ GuiManager::GuiManager() {
 	topRow->insert(1, sendInvite, "sendInvite");
 	topRow->insert(2, showInvites, "showInvites");
 
-	bottomRow->insert(0, play, "play");
-	bottomRow->insert(1, isReady, "isReady");
+	bottomRow->insert(0, backToMenu, "backToMenu");
+	bottomRow->insert(1, play, "play");
+	bottomRow->insert(2, isReady, "isReady");
 
 	lobbyUILayout->insert(0, topRow, "topRow");
 	lobbyUILayout->insert(1, invitesPanel, "invitesPanel");
@@ -205,6 +213,34 @@ GuiManager::GuiManager() {
 	lobbyUILayout->setVisible(false);
 	lobbyUILayout->setEnabled(false);
 	mainUI.add(lobbyUILayout);
+
+
+
+	soloGameLayout = tgui::VerticalLayout::create();
+	quitGame = tgui::Button::create();
+	resetGame = tgui::Button::create();
+
+	soloGameLayout->insert(0, resetGame, "resetGame");
+	soloGameLayout->insert(1, quitGame, "quitGame");
+	soloGameLayout->setVisible(false);
+	soloGameLayout->setEnabled(false);
+	mainUI.add(soloGameLayout);
+
+	/*multiGameLayout = tgui::VerticalLayout::create();
+	disconnect = tgui::Button::create();
+	forfeit = tgui::Button::create();
+	currentTurn = tgui::Label::create();*/
+
+	/*multiGameLayout->insert(0, soundsOn, "soundsOn");
+	multiGameLayout->insert(1, soundsCheckBoxLabel, "soundsLabel");
+	multiGameLayout->insert(2, highlightLegals, "highlightLegals");
+	multiGameLayout->insert(3, highlithCheckBoxLabel, "highlightLabel");
+	multiGameLayout->insert(4, currentTurn, "currentTurn");
+	multiGameLayout->insert(5, forfeit, "forfeit");
+	multiGameLayout->insert(6, disconnect, "disconnect");
+	multiGameLayout->setVisible(false);
+	multiGameLayout->setEnabled(false);*/
+
 }
 
 GuiManager * GuiManager::instance()
@@ -250,9 +286,10 @@ void GuiManager::init()
 	playSolo->getRenderer()->setBackgroundColorDown(darkBlue);
 	playSolo->getRenderer()->setBorderColor(darkBlue);
 	playSolo->connect("pressed", [&]() {
-		Client::instance()->setCurrentScreen(Client::Screen::SoloGame);
+		Client::instance()->setCurrentScreen(Client::Screen::OfflineGame);
 		Client::instance()->setColor("white");
 		setMenuUI(false);
+		setInGameUI(true);
 	});
 
 	playWithFriend->setSize( "100%", "40%" );
@@ -332,8 +369,23 @@ void GuiManager::init()
 	infoBoard->getRenderer()->setBorderColor(darkGrey);
 	setInfoBoardInfo();
 
-	play->setSize("70%", "40%");
-	play->setPosition("8%", "30%");
+	backToMenu->setSize("20%", "40%");
+	backToMenu->setPosition("0%", "30%");
+	backToMenu->setTextSize(20);
+	backToMenu->getRenderer()->setFont(latoBold);
+	backToMenu->getRenderer()->setBackgroundColor(niceRed);
+	backToMenu->getRenderer()->setBackgroundColorHover(darkerRed);
+	backToMenu->getRenderer()->setBackgroundColorDown(darkerRed);
+	backToMenu->getRenderer()->setTextColor(lightBlue);
+	backToMenu->setText("BACK");
+	backToMenu->connect("pressed", [&]() {
+		Client::instance()->setCurrentScreen(Client::Screen::Menu);
+		setLobbyUI(false);
+		setMenuUI(true);
+	});
+
+	play->setSize("55%", "40%");
+	play->setPosition("25%", "30%");
 	play->setTextSize(25);
 	play->getRenderer()->setFont(latoBold);
 	play->getRenderer()->setBackgroundColor(niceGreen);
@@ -347,6 +399,47 @@ void GuiManager::init()
 	isReady->setPosition("85%", "30%");
 	isReady->connect("checked", &GuiManager::toggleReady, this);
 	isReady->connect("unchecked", &GuiManager::toggleReady, this);
+
+
+
+	//solo UI setup
+	soloGameLayout->setSize(250, 560);
+	soloGameLayout->setPosition(700, 200);
+
+	resetGame->setPosition("5%", "45%");
+	resetGame->setSize("95%", "8%");
+	resetGame->setText("Restart");
+	resetGame->setTextSize(22);
+	resetGame->getRenderer()->setTextColor(darkGrey);
+	resetGame->getRenderer()->setFont(latoDefault);
+	resetGame->getRenderer()->setTextColorDown(lightBlue);
+	resetGame->getRenderer()->setBackgroundColor(lightBlue);
+	resetGame->getRenderer()->setBackgroundColorHover(niceRed);
+	resetGame->getRenderer()->setBackgroundColorDown(darkerRed);
+	resetGame->getRenderer()->setBorderColor(darkerRed);
+	resetGame->connect("pressed", [&]() {
+		Client::instance()->resetSoloGame();
+	});
+
+	quitGame->setPosition("5%", "55%");
+	quitGame->setSize("95%", "8%");
+	quitGame->setText("Quit");
+	quitGame->setTextSize(22);
+	quitGame->getRenderer()->setTextColor(darkGrey);
+	quitGame->getRenderer()->setFont(latoDefault);
+	quitGame->getRenderer()->setTextColorDown(lightBlue);
+	quitGame->getRenderer()->setBackgroundColor(lightBlue);
+	quitGame->getRenderer()->setBackgroundColorHover(niceRed);
+	quitGame->getRenderer()->setBackgroundColorDown(darkerRed);
+	quitGame->getRenderer()->setBorderColor(darkerRed);
+	quitGame->connect("pressed", [&]() {
+		Client::instance()->resetSoloGame();
+		Client::instance()->setColor("");
+		Client::instance()->setGameState(Board());
+		Client::instance()->setCurrentScreen(Client::Screen::Menu);
+		setMenuUI(true);
+		setInGameUI(false);
+	});
 }
 
 

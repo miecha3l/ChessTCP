@@ -15,7 +15,6 @@ private:
 	tgui::Button::Ptr playSolo;
 	tgui::Button::Ptr playWithFriend;
 
-	tgui::Gui lobbyUI{ client };
 	tgui::VerticalLayout::Ptr lobbyUILayout;
 	tgui::HorizontalLayout::Ptr topRow;
 	tgui::HorizontalLayout::Ptr bottomRow;
@@ -25,7 +24,20 @@ private:
 	tgui::TextBox::Ptr inputUserName;
 	tgui::Panel::Ptr infoBoard;
 	tgui::Button::Ptr play;
+	tgui::Button::Ptr backToMenu;
 	tgui::CheckBox::Ptr isReady;
+
+
+
+	tgui::VerticalLayout::Ptr soloGameLayout;
+	tgui::Button::Ptr quitGame;
+	tgui::Button::Ptr resetGame;
+	
+
+	tgui::VerticalLayout::Ptr multiGameLayout;
+	tgui::Button::Ptr disconnect;
+	tgui::Button::Ptr forfeit;
+	tgui::Label::Ptr currentTurn;
 	
 
 

@@ -55,7 +55,7 @@ void SoloGame::botMove() {
 	checks = false;
 }
 
-void SoloGame::turnChecks()
+bool SoloGame::turnChecks()
 {
 	if (!checks) {
 		if (turn == "white") {
@@ -63,6 +63,7 @@ void SoloGame::turnChecks()
 			BoardAnalisys::revalidateWhiteMoves(gameBoard);
 			if (BoardAnalisys::isWhiteInStalemate(gameBoard) || BoardAnalisys::isWhiteInCheckmate(gameBoard)) {
 				gameOver = "white";
+				return false;
 			}
 		}
 		else if (turn == "black") {
@@ -70,11 +71,13 @@ void SoloGame::turnChecks()
 			BoardAnalisys::revalidateBlackMoves(gameBoard);
 			if (BoardAnalisys::isBlackInStalemate(gameBoard) || BoardAnalisys::isBlackInCheckmate(gameBoard)) {
 				gameOver = "black";
+				return false;
 			}
 		}
 	}
 	Client::instance()->setGameState(gameBoard);
 	checks = true;
+	return true;
 }
 
 bool SoloGame::turnChecksDone() { return checks; }

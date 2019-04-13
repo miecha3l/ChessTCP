@@ -22,5 +22,6 @@ public:
 	bool isFirstTurn();
 	bool isInitialized();
 	std::string getCurrentTurn();
+	std::string getGameOver();
 };
 

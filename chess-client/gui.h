@@ -40,6 +40,10 @@ private:
 	tgui::Label::Ptr currentTurn;
 	
 
+	tgui::Panel::Ptr messageBoxBody;
+	tgui::Label::Ptr messageInfo;
+	tgui::Button::Ptr dismiss;
+
 
 	void inv();
 	void playReq();
@@ -58,6 +62,10 @@ private:
 	sf::Color niceRed = sf::Color(178, 50, 66, 255);
 	sf::Color darkerRed = sf::Color(130, 37, 49, 255);
 
+	bool showingMessageBox = false;
+	bool messageBoxDissmised = true;
+	void dissmissMsg();
+
 public:
 	static GuiManager* instance();
 	tgui::Gui* getMainUIHandle();
@@ -67,5 +75,8 @@ public:
 	void setLobbyUI(bool);
 	void setMenuUI(bool);
 	void setInGameUI(bool);
+	void setMessageBox(bool);
+	void displayMessage(std::string);
+	bool isShowingMessageBox();
 	void init();
 };

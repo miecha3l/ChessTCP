@@ -44,6 +44,8 @@ void windowThread() {
 	lobby.setTexture(lobbyBg);
 	moveSoundBuffer.loadFromFile("assets/move.wav");
 	moveSound.setBuffer(moveSoundBuffer);
+	sf::RectangleShape dimm(sf::Vector2f(1000, 760));
+	dimm.setFillColor(sf::Color(20, 20, 20, 150));
 	GuiManager::instance()->init();
 
 	client.create(resolution, "Chess");
@@ -53,6 +55,7 @@ void windowThread() {
 			else if (Client::instance()->getColor() == "black") background.setTexture(bgForBlack);
 		}
 		
+
 		//solo game stuff
 		if (Client::instance()->getCurrentScreen() == Client::Screen::OfflineGame) {
 			if (!Client::instance()->getSoloGameInstance()->isInitialized()) {
@@ -66,8 +69,7 @@ void windowThread() {
 					}
 				}
 				else {
-					//show win/lose communicat
-					Client::instance()->resetSoloGame();
+					GuiManager::instance()->displayMessage(Client::instance()->getSoloGameInstance()->getGameOver());
 				}
 			}
 		}
@@ -141,11 +143,20 @@ void windowThread() {
 
 			if (Client::instance()->getCurrentScreen() == Client::Screen::Menu) {
 				client.draw(splash);
+				if (GuiManager::instance()->isShowingMessageBox()) {
+					client.draw(dimm);
+					GuiManager::instance()->setMenuUI(false);
+				}
 			}
 
 
 			else if (Client::instance()->getCurrentScreen() == Client::Screen::Lobby) {
+				if (Client::instance()->getName().empty()) GuiManager::instance()->displayMessage("You're offline, sorry");
 				client.draw(lobby);
+				if (GuiManager::instance()->isShowingMessageBox()) {
+					client.draw(dimm);
+					GuiManager::instance()->setLobbyUI(false);
+				}
 			}
 
 
@@ -157,6 +168,7 @@ void windowThread() {
 				}
 				if (isPieceSelected) drawLegalMoves(pieceSelected, Client::instance()->getColor());
 				drawGameState(Client::instance()->getGameState(), client, Client::instance()->getColor());
+				if (GuiManager::instance()->isShowingMessageBox()) client.draw(dimm);
 			}
 			GuiManager::instance()->getMainUIHandle()->draw();
 		}

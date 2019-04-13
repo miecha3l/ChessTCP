@@ -78,6 +78,27 @@ void GuiManager::setInGameUI(bool s)
 	soloGameLayout->setVisible(s);
 }
 
+void GuiManager::setMessageBox(bool s)
+{
+	showingMessageBox = s;
+	messageBoxBody->setEnabled(s);
+	messageBoxBody->setVisible(s);
+}
+
+void GuiManager::dissmissMsg() {
+	std::cout << "dissmissing" << std::endl;
+	messageBoxDissmised = true;
+	showingMessageBox = false;
+	messageBoxBody->setEnabled(false);
+	messageBoxBody->setVisible(false);
+}
+
+void GuiManager::displayMessage(std::string s)
+{
+	messageInfo->setText(s);
+	setMessageBox(true);
+}
+
 void GuiManager::getPendingInvites() {
 	showInvites->getRenderer()->setBackgroundColor(lightBlue);
 	showInvites->getRenderer()->setBorderColor(darkBlue);
@@ -241,6 +262,18 @@ GuiManager::GuiManager() {
 	multiGameLayout->setVisible(false);
 	multiGameLayout->setEnabled(false);*/
 
+
+
+	//message box
+	messageBoxBody = tgui::Panel::create();
+	messageInfo = tgui::Label::create();
+	dismiss = tgui::Button::create();
+
+	messageBoxBody->add(messageInfo);
+	messageBoxBody->add(dismiss);
+	mainUI.add(messageBoxBody);
+	messageBoxBody->setEnabled(false);
+	messageBoxBody->setVisible(false);
 }
 
 GuiManager * GuiManager::instance()
@@ -263,6 +296,11 @@ void GuiManager::highlightPendingButton()
 }
 
 
+
+bool GuiManager::isShowingMessageBox()
+{
+	return showingMessageBox;
+}
 
 void GuiManager::init()
 {
@@ -440,6 +478,28 @@ void GuiManager::init()
 		setMenuUI(true);
 		setInGameUI(false);
 	});
+
+
+	//message box
+	messageBoxBody->setSize(300, 120);
+	messageBoxBody->setPosition(350, 380);
+	messageBoxBody->getRenderer()->setBackgroundColor(darkBlue);
+	
+	messageInfo->setAutoSize(true);
+	messageInfo->setPosition("25%", "10%");
+	messageInfo->setTextSize(20);
+	messageInfo->getRenderer()->setFont(latoDefault);
+
+	dismiss->setPosition("35%", "60%");
+	dismiss->setSize("30%", "30%");
+	dismiss->setText("O K");
+	dismiss->setTextSize(18);
+	dismiss->getRenderer()->setFont(latoDefault);
+	dismiss->getRenderer()->setBackgroundColor(niceGreen);
+	dismiss->getRenderer()->setBackgroundColorHover(darkerGreen);
+	dismiss->getRenderer()->setBackgroundColorDown(darkerGreen);
+	dismiss->getRenderer()->setBorders(0);;
+	dismiss->connect("pressed", &GuiManager::dissmissMsg, this);
 }
 
 

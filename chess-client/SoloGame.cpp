@@ -62,7 +62,7 @@ bool SoloGame::turnChecks()
 			for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
 			BoardAnalisys::revalidateWhiteMoves(gameBoard);
 			if (BoardAnalisys::isWhiteInStalemate(gameBoard) || BoardAnalisys::isWhiteInCheckmate(gameBoard)) {
-				gameOver = "white";
+				gameOver = "Black won!";
 				return false;
 			}
 		}
@@ -70,7 +70,7 @@ bool SoloGame::turnChecks()
 			for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
 			BoardAnalisys::revalidateBlackMoves(gameBoard);
 			if (BoardAnalisys::isBlackInStalemate(gameBoard) || BoardAnalisys::isBlackInCheckmate(gameBoard)) {
-				gameOver = "black";
+				gameOver = "White won!";
 				return false;
 			}
 		}
@@ -95,4 +95,9 @@ bool SoloGame::isInitialized()
 std::string SoloGame::getCurrentTurn()
 {
 	return turn;
+}
+
+std::string SoloGame::getGameOver()
+{
+	return gameOver;
 }

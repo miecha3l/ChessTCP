@@ -20,6 +20,7 @@ private:
 	void printPlayerList();
 	void printPlayerListWithInfo();
 	void printGameList();
+	void deletePlayer(Player*p);
 	int messagesCount();
 
 	sf::TcpSocket *client;
@@ -29,7 +30,6 @@ private:
 	std::map<Player*, sf::Thread*> threadOf;
 	std::map<Player*, Player*> matchOf;
 	std::map<int, Player*> playerOf;
-	
 
 public:
 	static Server *instance();
@@ -38,8 +38,11 @@ public:
 	int playersCount();
 	Player* getPlayer(int id);
 	void matchPlayers(int, int);
+	void removeMatch(int);
 	Player* getPlayerMatch(Player*);
+	sf::Thread* getThreadOf(Player*);
 	std::list<Player*> getPlayersList();
 	~Server();
+
 };
 

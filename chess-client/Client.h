@@ -31,7 +31,6 @@ private:
 	bool onlinePlayersUpToDate = true;
 	bool matchReq = false;
 	std::string requester;
-	bool matchAcc = false;
 	bool isReady = false;
 	bool isMatchReady = false;
 
@@ -59,7 +58,6 @@ public:
 	bool isPlayersListUpToDate();
 	bool isMatchReqPending();
 	std::string getRequester();
-	void setMatchAcc(bool);
 	void setMatchReq(bool);
 	void setMatchName(std::string);
 	void setRequester(std::string);

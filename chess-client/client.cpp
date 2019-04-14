@@ -55,7 +55,6 @@ void Client::sendRequest() {
 			req << raw;
 			serverConnection.send(req);
 			Sleep(250);
-			GuiManager::instance()->setIsReady(true);
 		}
 		Sleep(250);
 	}
@@ -71,6 +70,7 @@ void Client::receiveResponse() {
 }
 
 void Client::handleResponse() {
+	sf::Mutex mutex;
 	while (true) {
 		if (responses.size() > 0) {
 			std::string resp;
@@ -81,6 +81,7 @@ void Client::handleResponse() {
 				for (int i = 0; i < 5; ++i) color.push_back(response.handle()[i]);
 				for (int i = 6; i < response.handle().size(); i++) initialGs.push_back(response.handle()[i]);
 				gs = GameState(initialGs);
+				currentScreen = Screen::OnlineGame;
 				inGame = true;
 				serverConnection.setBlocking(true);
 				break;
@@ -93,13 +94,9 @@ void Client::handleResponse() {
 				gameOverReason = response.handle();
 				inGame = false;
 				gs = GameState("");
-				matchName.clear();
 				isMatchReady = false;
 				isReady = false;
 				color.clear();
-				currentScreen = Screen::Menu;
-				GuiManager::instance()->setMenuUI(true);
-				GuiManager::instance()->setLobbyUI(false);
 				serverConnection.setBlocking(false);
 				gameOverReason.clear();
 				break;
@@ -112,17 +109,18 @@ void Client::handleResponse() {
 				}
 				if (response.handle() == "acc") {
 					if (matchName.empty()) {
-						std::cout << "match accepted" << std::endl;
 						matchReq = false;
 						matchName = requester;
-						GuiManager::instance()->setInfoBoardInfo();
 						requester.clear();
+						GuiManager::instance()->setInfoBoardInfo();
+						while(!GuiManager::instance()->mainUIHandleFree()){}
 					}
 				}
 				if (response.handle() == "dec") {
 					matchReq = false;
 					std::cout << "match declined" << std::endl;
 					requester.clear();
+					GuiManager::instance()->displayMessage("Match declined");
 				}
 				
 				break;
@@ -130,11 +128,19 @@ void Client::handleResponse() {
 			case Response::Type::Notification:
 				if (response.handle() == "is_notready") {
 					isMatchReady = false;
+
 					GuiManager::instance()->setInfoBoardInfo();
 				}
 				else if (response.handle() == "is_ready") {
 					isMatchReady = true;
+
 					GuiManager::instance()->setInfoBoardInfo();
+				}
+				else if (response.handle() == "unmatch") {
+					matchName = "";
+					isMatchReady = false;
+					matchReq = false;
+					GuiManager::instance()->displayMessage("unmatched");
 				}
 				break;
 
@@ -214,10 +220,6 @@ std::string Client::getRequester()
 	return requester;
 }
 
-void Client::setMatchAcc(bool s)
-{
-	matchAcc = s;
-}
 
 void Client::setMatchReq(bool s)
 {

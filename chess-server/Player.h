@@ -14,7 +14,8 @@ private:
 public:
 	static enum Status {
 		Idle,
-		InLobby,
+		InLobbyNotReady,
+		InLobbyReady,
 		InGame,
 		Disconnected
 	};

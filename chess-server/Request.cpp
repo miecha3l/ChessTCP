@@ -16,13 +16,18 @@ Request::Request(Type t, std::string cont, std::string s, std::string r)
 	}
 	else {
 		receiver = std::stoi(r);
+		if (Server::instance()->getPlayer(receiver) == NULL) throw 10;
+		if (sender == receiver) throw 11;
+		if (receiver < 1000) throw 12;
 	}
 }
 
 void Request::handle() {
 	if (type == Type::REQUEST) {
+
 		if(content == "match"){
-			if (Server::instance()->getPlayerMatch(Server::instance()->getPlayer(sender)) == NULL) {
+			if (Server::instance()->getPlayerMatch(Server::instance()->getPlayer(sender)) == NULL && Server::instance()->getPlayerMatch(Server::instance()->getPlayer(receiver)) == NULL) {
+ 
 				std::string msg = "match/";
 				msg.append(std::to_string(sender));
 				sf::Packet response;
@@ -30,25 +35,34 @@ void Request::handle() {
 				Server::instance()->getPlayer(receiver)->getClient()->send(response);
 			}
 		}
+
 		else if (content == "match_acc") {
-			if (Server::instance()->getPlayerMatch(Server::instance()->getPlayer(sender)) == NULL) {
+			if (Server::instance()->getPlayerMatch(Server::instance()->getPlayer(sender)) == NULL && Server::instance()->getPlayerMatch(Server::instance()->getPlayer(receiver)) == NULL ) {
 				Server::instance()->matchPlayers(sender, receiver);
+				Server::instance()->getPlayer(sender)->setPlayersStatus(Player::Status::InLobbyNotReady);
+				Server::instance()->getPlayer(receiver)->setPlayersStatus(Player::Status::InLobbyNotReady);
 				sf::Packet resp;
 				resp << "match/acc";
 				Server::instance()->getPlayer(receiver)->getClient()->send(resp);
+				Server::instance()->getPlayer(sender)->getClient()->send(resp);
 			}
 		}
+
 		else if (content == "match_dec") {
 			sf::Packet resp;
 			resp << "match/dec";
 			Server::instance()->getPlayer(receiver)->getClient()->send(resp);
 		}
-		else if (content == "is_ready" || content == "is_notready") {
+
+		else if (content == "unmatch") {
+			Server::instance()->removeMatch(sender);
+			Server::instance()->removeMatch(receiver);
 			sf::Packet resp;
-			std::string cont = "notification/";
-			resp << cont.append(content);
+			resp << "notification/unmatch";
+			Server::instance()->getPlayer(sender)->getClient()->send(resp);
 			Server::instance()->getPlayer(receiver)->getClient()->send(resp);
 		}
+
 		else if (content == "play") {
 			if (Server::instance()->getPlayerMatch(Server::instance()->getPlayer(sender))->getId() == receiver) {
 				Server::instance()->getPlayer(sender)->setPlayersStatus(Player::Status::InGame);
@@ -74,6 +88,7 @@ void Request::handle() {
 				colorB.clear();
 			}
 		}
+
 		else if (content == "get_plist") {
 			std::string response = "plist/";
 			sf::Packet resp;
@@ -84,7 +99,10 @@ void Request::handle() {
 			resp << response;
 			Server::instance()->getPlayer(sender)->getClient()->send(resp);
 		}
+
 	}
+
+
 	else if (type == Type::MESSAGE) {
 		sf::Packet cont;
 		std::string response = "message/";
@@ -92,7 +110,9 @@ void Request::handle() {
 		cont << response;
 		Server::instance()->getPlayer(receiver)->getClient()->send(cont);
 	}
+
 	else if (type == Type::GAME_REQ) {
+
 		if (Server::instance()->getPlayer(receiver) != NULL) {
 			GameState updatedGs = gameOf[Server::instance()->getPlayer(sender)]->updateGameInstance(std::stoi(content));
 			sf::Packet cont;
@@ -101,6 +121,7 @@ void Request::handle() {
 			Server::instance()->getPlayer(sender)->getClient()->send(cont);
 			Server::instance()->getPlayer(receiver)->getClient()->send(cont);
 		}
+
 		else {
 			sf::Packet cont;
 			std::cout << "game_over/enemy_disconnected" << std::endl;
@@ -108,6 +129,7 @@ void Request::handle() {
 			Server::instance()->getPlayer(sender)->setPlayersStatus(Player::Status::Idle);
 			Server::instance()->getPlayer(sender)->getClient()->send(cont);
 		}
+
 	}
 }
 

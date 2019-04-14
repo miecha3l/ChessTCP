@@ -120,7 +120,9 @@ void windowThread() {
 					isPieceSelected = false;
 				}
 			}
-			GuiManager::instance()->getMainUIHandle()->handleEvent(evnt);
+			if (GuiManager::instance()->mainUIHandleFree()) {
+				GuiManager::instance()->getMainUIHandle()->handleEvent(evnt);
+			}
 		}
 
 		client.clear();
@@ -133,9 +135,6 @@ void windowThread() {
 			}
 			drawGameState(Client::instance()->getGameState(), client, Client::instance()->getColor());
 		}
-
-
-
 		else {
 
 			if (bgLoaded) bgLoaded = false;
@@ -145,7 +144,7 @@ void windowThread() {
 				client.draw(splash);
 				if (GuiManager::instance()->isShowingMessageBox()) {
 					client.draw(dimm);
-					GuiManager::instance()->setMenuUI(false);
+					GuiManager::instance()->setMenuUI(false, true);
 				}
 			}
 
@@ -155,7 +154,7 @@ void windowThread() {
 				client.draw(lobby);
 				if (GuiManager::instance()->isShowingMessageBox()) {
 					client.draw(dimm);
-					GuiManager::instance()->setLobbyUI(false);
+					GuiManager::instance()->setLobbyUI(false, true);
 				}
 			}
 
@@ -168,13 +167,13 @@ void windowThread() {
 				}
 				if (isPieceSelected) drawLegalMoves(pieceSelected, Client::instance()->getColor());
 				drawGameState(Client::instance()->getGameState(), client, Client::instance()->getColor());
-				if (GuiManager::instance()->isShowingMessageBox()) client.draw(dimm);
+				if (GuiManager::instance()->isShowingMessageBox()) {
+					client.draw(dimm);
+				}
 			}
-			GuiManager::instance()->getMainUIHandle()->draw();
+			
 		}
-
-
-
+		GuiManager::instance()->drawGui();
 		client.display();
 	}
 }
@@ -186,7 +185,6 @@ int main() {
 	clientWindow.launch();
 	Client::instance()->init();
 
-	
 	return 0;
 }
 

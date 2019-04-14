@@ -7,7 +7,15 @@ Server* Server::obj = NULL;
 std::list<GameInstance*> gameInstances;
 std::map<Player*, GameInstance*> gameOf;
 extern Queue<sf::Packet> communicationQueue;
+extern Queue<Player*> playersToRemove;
 
+GameInstance* getGameOf(Player*p) {
+	auto outcome = gameOf.find(p);
+	if (outcome == gameOf.end()) {
+		return NULL;
+	}
+	else return outcome->second;
+}
 
 Server::Server()
 {
@@ -26,7 +34,7 @@ void Server::acceptClients() {
 	while (true) {
 		listener.listen(port);
 		listener.accept(*client);
-		if (client->getRemotePort() == 0) continue;
+		if (client->getRemotePort() <= 0) continue;
 
 		players.push_back(new Player(client, std::to_string(client->getRemotePort())));
 		playerThreads.push_back(new sf::Thread(&Player::communicate, players.back()));
@@ -42,68 +50,76 @@ void Server::acceptClients() {
 	}
 }
 
+void Server::removeMatch(int id) {
+	matchOf.erase(getPlayer(id));
+}
+
 void Server::updatePlayersAndGamesList() {
 	while (true) {
-		for (auto plr : players) {
-			bool deleted = false;
-			if (plr->getPlayersStatus() == Player::Status::Disconnected) {
+		if (playersToRemove.size() > 0) {
+			Player *p = playersToRemove.pop();
+			std::cout << "Deleting: \n";
+			std::cout << "\n" << p->getId() << "\n";
+			deletePlayer(p);
+		}
+		Sleep(100);
+	}
+}
 
-				//remove thread
-				for (auto t : playerThreads) {
-					bool deleted = false;
-					if (threadOf[plr] == t) {
-						for (auto trd = playerThreads.begin(); trd != playerThreads.end(); trd++) {
-							if (*trd == t) {
-								delete *trd;
-								playerThreads.erase(trd);
-								deleted = true;
-								break;
-							}
-						}
-					}
-					if (deleted) break;
-				}
-			
-				//remove player obj
-				for (auto p = players.begin(); p != players.end(); p++) {
-					if (*p == plr) {
-						if (gameOf[plr] != NULL) {
-							sf::Packet cont;
-							cont << "game_over/enemy_disconnected";
-							getPlayerMatch(plr)->getClient()->send(cont);
-							getPlayerMatch(plr)->setPlayersStatus(Player::Status::Idle);
-							gameOf.erase(getPlayerMatch(plr));
-							for (auto game : gameInstances) {
-								if (game == gameOf[plr]) {
-									bool deleted = false;
-									for (auto g = gameInstances.begin(); g != gameInstances.end(); g++) {
-										if (*g == game) {
-											delete *g;
-											gameInstances.erase(g);
-											deleted = true;
-											break;
-										}
-									}
-									if (deleted) break;
-								}
-							}
-						}
-						threadOf.erase(plr);
-						matchOf.erase(matchOf[plr]);
-						matchOf.erase(plr);
-						playerOf.erase(plr->getId());
-						gameOf.erase(plr);
-						delete *p;
-						players.erase(p);
+void Server::deletePlayer(Player*p) {
+	//delete clients thread
+	for (auto trd = playerThreads.begin(); trd != playerThreads.end(); trd++) {
+		if (*trd == getThreadOf(p)) {
+			delete *trd;
+			threadOf.erase(p);
+			playerThreads.erase(trd);
+			break;
+		}
+	}
+	//delete players game
+	if (getGameOf(p) != NULL) {
+		sf::Packet cont;
+		cont << "game_over/enemy_disconnected";
+		getPlayerMatch(p)->getClient()->send(cont);
+		getPlayerMatch(p)->setPlayersStatus(Player::Status::Idle);
+		gameOf.erase(getPlayerMatch(p));
+		for (auto game : gameInstances) {
+			if (game == getGameOf(p)) {
+				bool deleted = false;
+				for (auto g = gameInstances.begin(); g != gameInstances.end(); g++) {
+					if (*g == game) {
+						delete *g;
+						gameInstances.erase(g);
 						deleted = true;
 						break;
 					}
 				}
+				if (deleted) break;
 			}
-			if (deleted) break;
 		}
+	}
 
-		Sleep(200);
+	//deleting all connections
+	if (getPlayerMatch(p) != NULL) {
+		sf::Packet msg;
+		std::string cont = "notification/unmatch";
+		getPlayerMatch(p)->setPlayersStatus(Player::Status::Idle);
+		msg << cont;
+		getPlayerMatch(p)->getClient()->send(msg);
+		matchOf.erase(getPlayerMatch(p));
+	}
+
+	matchOf.erase(p);
+	playerOf.erase(p->getId());
+	gameOf.erase(p);
+
+	//deleting players obj
+	delete p;
+	for (auto plr = players.begin(); plr != players.end(); plr++) {
+		if (*plr == p) {
+			players.erase(plr);
+			break;
+		}
 	}
 }
 
@@ -113,12 +129,14 @@ void Server::handleMessages() {
 			std::string container;
 			sf::Packet msg = communicationQueue.pop();
 			msg >> container;
-
+			std::cout << "Request: \n";
+			std::cout << "\n" << container << "\n";
 			try {
 				Request req = Request::parse(container);
 				if (req.isValid()) req.handle();
 			}
 			catch (std::invalid_argument &e) {}
+			catch (int &e) {}
 			catch(...){}
 		}
 		Sleep(200);
@@ -183,7 +201,8 @@ void Server::printASCII() {
 	std::cout << R"(                    ____) | |____| | \ \  \  /  | |____| | \ \ )" << std::endl;
 	std::cout << R"(                   |_____/|______|_|  \_\  \/   |______|_|  \_\)" << std::endl;
 	std::cout << R"(                   --------------v1.0 by miecha3l--------------)" << std::endl;
-	std::cout << R"(                            type "?" to see help info          )" << std::endl;
+	std::cout << R"(                                                               )" << std::endl;
+	std::cout << R"(type "?" to see help info                                      )" << std::endl;
 }
 
 void Server::init() {
@@ -224,13 +243,21 @@ void Server::printPlayerListWithInfo()
 
 		case Player::Status::Idle:
 			status = "idle";
-			std::cout << "Player is: " << status << std::endl;
+			break;
+
+		case Player::Status::InLobbyNotReady:
+			status = "inLobbyNotReady";
+			break;
+
+		case Player::Status::InLobbyReady:
+			status = "inLobbyNotReady";
 			break;
 
 		default: 
 			status = "unknown";
 			break;
 		}
+		std::cout << "Player is: " << status << std::endl;
 		if (matchOf[p] != NULL) {
 			std::cout << "Players match: " << matchOf[p]->getId() << std::endl;
 		}
@@ -263,11 +290,27 @@ int Server::messagesCount() {
 }
 
 Player* Server::getPlayer(int id) {
-	return playerOf[id];
+	auto outcome = playerOf.find(id);
+	if (outcome == playerOf.end()) {
+		return NULL;
+	}
+	else return outcome->second;
 }
 
 Player *Server::getPlayerMatch(Player *p) {
-	return matchOf[p];
+	auto outcome = matchOf.find(p);
+	if (outcome == matchOf.end()) {
+		return NULL;
+	}
+	else return outcome->second;
+}
+
+sf::Thread* Server::getThreadOf(Player*p) {
+	auto outcome = threadOf.find(p);
+	if (outcome == threadOf.end()) {
+		return NULL;
+	}
+	else return outcome->second;
 }
 
 void Server::matchPlayers(int a, int b){

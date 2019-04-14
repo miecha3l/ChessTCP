@@ -1,5 +1,6 @@
 #include "gui.h"
 #include "Client.h"
+#include "Windows.h"
 
 GuiManager* GuiManager::gm = NULL;
 
@@ -15,29 +16,45 @@ void GuiManager::inv() {
 void GuiManager::playReq() {
 	std::string body = "req/play/";
 	if (!Client::instance()->getMatchName().empty()) {
-		if (Client::instance()->isPlayerReady() && Client::instance()->isPlayersMatchReady()) {
-			Client::instance()->addReqToQueue(body.append(Client::instance()->getMatchName()).append("/").append(Client::instance()->getName()));
-			setLobbyUI(false);
-		}
+		Client::instance()->addReqToQueue(body.append(Client::instance()->getMatchName()).append("/").append(Client::instance()->getName()));
+		setLobbyUI(false);
 	}
 }
 
 void GuiManager::setInfoBoardInfo()
 {
 	infoBoard->removeAllWidgets();
-
+	setInfoBoard(false);
 	if (!Client::instance()->getMatchName().empty()) {
 		infoBoard->setSize("100%", "40%");
 		auto matchLabel = tgui::Label::create();
 		infoBoard->add(matchLabel);
-		matchLabel->setSize("100%", "25%");
+		matchLabel->setSize("80%", "25%");
 		matchLabel->setPosition("0%", "67%");
 		std::string text = "Match: ";
-		std::string ready = Client::instance()->isPlayersMatchReady() ? "    Is ready" : "    Not ready";
-		matchLabel->setText(text.append(Client::instance()->getMatchName()).append(ready));
+		matchLabel->setText(text.append(Client::instance()->getMatchName()));
 		matchLabel->setTextSize(28);
-		matchLabel->getRenderer()->setTextColor(niceRed);
-		if (Client::instance()->isPlayersMatchReady()) matchLabel->getRenderer()->setTextColor(darkerGreen);
+		matchLabel->getRenderer()->setTextColor(darkGrey);
+
+		auto unmatchButton = tgui::Button::create();
+		infoBoard->add(unmatchButton);
+		unmatchButton->setSize("8%", "10%");
+		unmatchButton->setPosition("85%", "70%");
+		unmatchButton->setText("X");
+		unmatchButton->setTextSize(20);
+		unmatchButton->getRenderer()->setBackgroundColor(niceRed);
+		unmatchButton->getRenderer()->setBackgroundColorHover(darkerRed);
+		unmatchButton->getRenderer()->setBackgroundColorDown(darkerRed);
+		unmatchButton->getRenderer()->setFont(latoBold);
+		unmatchButton->getRenderer()->setTextColor(lightBlue);
+		unmatchButton->getRenderer()->setBorders(false);
+		unmatchButton->connect("pressed", [&](){
+			if (!Client::instance()->getMatchName().empty()) {
+				std::string msg = "req/unmatch/";
+				Client::instance()->addReqToQueue(msg.append(Client::instance()->getMatchName()).append("/").append(Client::instance()->getName()));
+			}
+		});
+		
 	}
 	else {
 		infoBoard->setSize("100%", "20%");
@@ -45,25 +62,31 @@ void GuiManager::setInfoBoardInfo()
 
 	auto playerLabel = tgui::Label::create();
 	infoBoard->add(playerLabel);
-	playerLabel->setSize("100%", "25%");
+	playerLabel->setSize("80%", "25%");
 	playerLabel->setPosition("0%", "23%");
 	std::string text = "You: ";
-	std::string ready = Client::instance()->isPlayerReady() ? "    Is ready" : "    Not ready";
-	playerLabel->setText(text.append(Client::instance()->getName()).append(ready));
+	playerLabel->setText(text.append(Client::instance()->getName()));
 	playerLabel->setTextSize(28);
-	playerLabel->getRenderer()->setTextColor(niceRed);
-	if (Client::instance()->isPlayerReady()) playerLabel->getRenderer()->setTextColor(darkerGreen);
+	playerLabel->getRenderer()->setTextColor(darkGrey);
+	setInfoBoard(true);
 }
 
-void GuiManager::setIsReady(bool s)
+void GuiManager::setInfoBoard(bool s)
 {
-	isReady->setEnabled(s);
+	infoBoard->setEnabled(s);
+	infoBoard->setVisible(s);
 }
 
 void GuiManager::setLobbyUI(bool s)
 {
+	setInfoBoardInfo();
 	lobbyUILayout->setEnabled(s);
 	lobbyUILayout->setVisible(s);
+}
+void GuiManager::setLobbyUI(bool s1, bool s2)
+{
+	lobbyUILayout->setEnabled(s1);
+	lobbyUILayout->setVisible(s2);
 }
 
 void GuiManager::setMenuUI(bool s)
@@ -71,11 +94,22 @@ void GuiManager::setMenuUI(bool s)
 	mainUILayout->setEnabled(s);
 	mainUILayout->setVisible(s);
 }
+void GuiManager::setMenuUI(bool s1, bool s2)
+{
+	mainUILayout->setEnabled(s1);
+	mainUILayout->setVisible(s2);
+}
 
 void GuiManager::setInGameUI(bool s)
 {
 	soloGameLayout->setEnabled(s);
 	soloGameLayout->setVisible(s);
+}
+
+void GuiManager::setInGameUI(bool s1, bool s2)
+{
+	soloGameLayout->setEnabled(s1);
+	soloGameLayout->setVisible(s2);
 }
 
 void GuiManager::setMessageBox(bool s)
@@ -91,7 +125,33 @@ void GuiManager::dissmissMsg() {
 	showingMessageBox = false;
 	messageBoxBody->setEnabled(false);
 	messageBoxBody->setVisible(false);
+	switch (Client::instance()->getCurrentScreen()) {
+	case Client::Screen::Lobby:
+		setLobbyUI(true);
+		if (Client::instance()->getName().empty()) {
+			Client::instance()->setCurrentScreen(Client::Screen::Menu);
+			setLobbyUI(false);
+			setMenuUI(true);
+		}
+		break;
+
+	case Client::Screen::Menu:
+		setMenuUI(true);
+		break;
+
+	case Client::Screen::OfflineGame:
+		setInGameUI(true);
+		break;
+
+	case Client::Screen::OnlineGame:
+		setLobbyUI(true);
+		setMenuUI(false);
+		setInGameUI(false);
+		Client::instance()->setCurrentScreen(Client::Screen::Lobby);
+		break;
+	}
 }
+
 
 void GuiManager::displayMessage(std::string s)
 {
@@ -101,7 +161,7 @@ void GuiManager::displayMessage(std::string s)
 
 void GuiManager::getPendingInvites() {
 	showInvites->getRenderer()->setBackgroundColor(lightBlue);
-	showInvites->getRenderer()->setBorderColor(darkBlue);
+	showInvites->getRenderer()->setBorderColor(borders);
 	showInvites->getRenderer()->setBackgroundColorHover(darkBlue);
 	if (Client::instance()->isMatchReqPending()) {
 		Client::instance()->setOnlinePlayersListUpToDate(false);
@@ -109,9 +169,8 @@ void GuiManager::getPendingInvites() {
 		Client::instance()->addReqToQueue(body.append(Client::instance()->getName()));
 		invitesPanel->removeAllWidgets();
 
-		while (!Client::instance()->isPlayersListUpToDate()) {}
-
-		invitesPanel->setSize("100%", Client::instance()->getOnlinePlayersList().size() * 25);
+		invitesPanel->setSize("100%", 50);
+		while(!Client::instance()->isPlayersListUpToDate()){}
 
 		for (auto p : Client::instance()->getOnlinePlayersList()) {
 			if (p == Client::instance()->getName()) continue;
@@ -131,24 +190,21 @@ void GuiManager::getPendingInvites() {
 				acceptButton->setSize("25%", 25);
 				acceptButton->setPosition("35%", yPos + 10);
 				acceptButton->setText("Accept");
-				acceptButton->getRenderer()->setTextColor(darkGrey);
+				acceptButton->getRenderer()->setTextColor(lightBlue);
 				acceptButton->getRenderer()->setTextColorDown(lightBlue);
-				acceptButton->getRenderer()->setBackgroundColor(lightBlue);
+				acceptButton->getRenderer()->setBackgroundColor(darkGrey);
 				acceptButton->getRenderer()->setBackgroundColorHover(niceGreen);
 				acceptButton->getRenderer()->setBackgroundColorDown(darkerGreen);
-				acceptButton->getRenderer()->setBorderColor(darkBlue);
+				acceptButton->getRenderer()->setBorders(false);
 				acceptButton->setTextSize(13);
 				acceptButton->connect("pressed", [&]() {
 					if (Client::instance()->getMatchName().empty()) {
 						std::string msg = "req/match_acc/";
-						Client::instance()->setMatchAcc(true);
-						Client::instance()->setMatchReq(false);
-						Client::instance()->setMatchName(Client::instance()->getRequester());
-						Client::instance()->addReqToQueue(msg.append(Client::instance()->getMatchName()).append("/").append(Client::instance()->getName()));
-						setInfoBoardInfo();
+						Client::instance()->addReqToQueue(msg.append(Client::instance()->getRequester()).append("/").append(Client::instance()->getName()));
 						invitesPanel->removeAllWidgets();
 						invitesPanel->setEnabled(false);
 						invitesPanel->setVisible(false);
+						setInfoBoardInfo();
 					}
 				});
 
@@ -158,15 +214,14 @@ void GuiManager::getPendingInvites() {
 				declineButton->setPosition("65%", yPos + 10);
 				declineButton->setText("Decline");
 				declineButton->setTextSize(13);
-				declineButton->getRenderer()->setTextColor(darkGrey);
+				declineButton->getRenderer()->setTextColor(lightBlue);
 				declineButton->getRenderer()->setTextColorDown(lightBlue);
-				declineButton->getRenderer()->setBackgroundColor(lightBlue);
+				declineButton->getRenderer()->setBackgroundColor(darkGrey);
 				declineButton->getRenderer()->setBackgroundColorHover(niceRed);
 				declineButton->getRenderer()->setBackgroundColorDown(darkerRed);
-				declineButton->getRenderer()->setBorderColor(darkBlue);
+				declineButton->getRenderer()->setBorders(false);
 				declineButton->connect("pressed", [&]() {
 					std::string msg = "req/match_dec/";
-					Client::instance()->setMatchAcc(false);
 					Client::instance()->setMatchReq(false);
 					Client::instance()->addReqToQueue(msg.append(Client::instance()->getRequester()).append("/").append(Client::instance()->getName()));
 					invitesPanel->removeAllWidgets();
@@ -180,14 +235,6 @@ void GuiManager::getPendingInvites() {
 	invitesPanel->setEnabled(!invitesPanel->isEnabled());
 }
 
-void GuiManager::toggleReady()
-{
-	Client::instance()->setIsReady(isReady->isChecked());
-	setInfoBoardInfo();
-	std::string req = isReady->isChecked() ? "req/is_ready/" : "req/is_notready/";
-	Client::instance()->addReqToQueue(req.append(Client::instance()->getMatchName()).append("/").append(Client::instance()->getName()));
-	isReady->setEnabled(false);
-}
 
 
 
@@ -217,7 +264,6 @@ GuiManager::GuiManager() {
 	infoBoard = tgui::Panel::create();
 	backToMenu = tgui::Button::create();
 	play = tgui::Button::create();
-	isReady = tgui::CheckBox::create();
 
 	topRow->insert(0, inputUserName, "inputUserName");
 	topRow->insert(1, sendInvite, "sendInvite");
@@ -225,7 +271,6 @@ GuiManager::GuiManager() {
 
 	bottomRow->insert(0, backToMenu, "backToMenu");
 	bottomRow->insert(1, play, "play");
-	bottomRow->insert(2, isReady, "isReady");
 
 	lobbyUILayout->insert(0, topRow, "topRow");
 	lobbyUILayout->insert(1, invitesPanel, "invitesPanel");
@@ -288,6 +333,19 @@ tgui::Gui * GuiManager::getMainUIHandle()
 	return p;
 }
 
+void GuiManager::drawGui()
+{
+	sf::Mutex mutex;
+	mutex.lock();
+	mainUI.draw();
+	mutex.unlock();
+}
+
+bool GuiManager::mainUIHandleFree()
+{
+	return !updatingInfoBoard;
+}
+
 void GuiManager::highlightPendingButton()
 {
 	showInvites->getRenderer()->setBackgroundColor(niceRed);
@@ -322,7 +380,7 @@ void GuiManager::init()
 	playSolo->getRenderer()->setBackgroundColor(lightBlue);
 	playSolo->getRenderer()->setBackgroundColorHover(darkBlue);
 	playSolo->getRenderer()->setBackgroundColorDown(darkBlue);
-	playSolo->getRenderer()->setBorderColor(darkBlue);
+	playSolo->getRenderer()->setBorders(false);
 	playSolo->connect("pressed", [&]() {
 		Client::instance()->setCurrentScreen(Client::Screen::OfflineGame);
 		Client::instance()->setColor("white");
@@ -339,7 +397,7 @@ void GuiManager::init()
 	playWithFriend->getRenderer()->setBackgroundColor(lightBlue);
 	playWithFriend->getRenderer()->setBackgroundColorHover(darkBlue);
 	playWithFriend->getRenderer()->setBackgroundColorDown(darkBlue);
-	playWithFriend->getRenderer()->setBorderColor(darkBlue);
+	playWithFriend->getRenderer()->setBorders(false);
 	playWithFriend->connect("pressed", [&]() {
 		mainUILayout->setEnabled(false);
 		mainUILayout->setVisible(false);
@@ -362,11 +420,11 @@ void GuiManager::init()
 	inputUserName->setSize("30%", "100%");
 	inputUserName->setTextSize(30);
 	inputUserName->getRenderer()->setFont(latoDefault);
-	inputUserName->getRenderer()->setBorders(2);
-	inputUserName->getRenderer()->setBorderColor(darkBlue);
+	inputUserName->getRenderer()->setBorders(3);
+	inputUserName->getRenderer()->setBorderColor(borders);
 	inputUserName->getRenderer()->setBackgroundColor(lightBlue);
 	inputUserName->getRenderer()->setCaretColor(sf::Color::Black);
-	inputUserName->getRenderer()->setTextColor(darkGrey);
+	inputUserName->getRenderer()->setTextColor(borders);
 	
 	sendInvite->setSize("30%", "100%");
 	sendInvite->setTextSize(20);
@@ -376,11 +434,12 @@ void GuiManager::init()
 	sendInvite->getRenderer()->setBackgroundColor(lightBlue);
 	sendInvite->getRenderer()->setBackgroundColorHover(darkBlue);
 	sendInvite->getRenderer()->setBackgroundColorDown(darkBlue);
-	sendInvite->getRenderer()->setBorderColor(darkBlue);
+	sendInvite->getRenderer()->setBorderColor(borders);
+	sendInvite->getRenderer()->setBorders(false);
 	sendInvite->setText("Invite");
 	sendInvite->connect("pressed", &GuiManager::inv, this);
 
-	showInvites->setSize("35%", "100%");
+	showInvites->setSize("30%", "100%");
 	showInvites->setTextSize(20);
 	showInvites->getRenderer()->setTextColor(darkGrey);
 	showInvites->getRenderer()->setFont(latoDefault);
@@ -388,24 +447,25 @@ void GuiManager::init()
 	showInvites->getRenderer()->setBackgroundColor(lightBlue);
 	showInvites->getRenderer()->setBackgroundColorHover(darkBlue);
 	showInvites->getRenderer()->setBackgroundColorDown(darkBlue);
-	showInvites->getRenderer()->setBorderColor(darkBlue);
+	showInvites->getRenderer()->setBorderColor(borders);
+	showInvites->getRenderer()->setBorders(false);
 	showInvites->setText("Show pending");
 	showInvites->connect("pressed", &GuiManager::getPendingInvites, this);
 
 	invitesPanel->setSize("100%", "5%");
 	invitesPanel->setPosition("0%", "7%");
 	invitesPanel->getRenderer()->setFont(latoDefault);
-	invitesPanel->getRenderer()->setBackgroundColor(darkBlue);
+	invitesPanel->getRenderer()->setBackgroundColor(lightBlue);
+	invitesPanel->getRenderer()->setBorderColor(borders);
 	invitesPanel->setVisible(false);
 	invitesPanel->setEnabled(false);
 
 	infoBoard->setSize("100%", "40%");
 	infoBoard->setPosition("0%", "25%");
 	infoBoard->getRenderer()->setFont(latoDefault);
-	infoBoard->getRenderer()->setBackgroundColor(darkBlue);
+	infoBoard->getRenderer()->setBackgroundColor(lightBlue);
 	infoBoard->getRenderer()->setBorders(4);
-	infoBoard->getRenderer()->setBorderColor(darkGrey);
-	setInfoBoardInfo();
+	infoBoard->getRenderer()->setBorderColor(borders);
 
 	backToMenu->setSize("20%", "40%");
 	backToMenu->setPosition("0%", "30%");
@@ -415,28 +475,31 @@ void GuiManager::init()
 	backToMenu->getRenderer()->setBackgroundColorHover(darkerRed);
 	backToMenu->getRenderer()->setBackgroundColorDown(darkerRed);
 	backToMenu->getRenderer()->setTextColor(lightBlue);
+	backToMenu->getRenderer()->setBorders(false);
 	backToMenu->setText("BACK");
 	backToMenu->connect("pressed", [&]() {
 		Client::instance()->setCurrentScreen(Client::Screen::Menu);
 		setLobbyUI(false);
 		setMenuUI(true);
+		if (!Client::instance()->getMatchName().empty()) {
+			std::string msg = "req/unmatch/";
+			Client::instance()->addReqToQueue(msg.append(Client::instance()->getMatchName()).append("/").append(Client::instance()->getName()));
+		}
 	});
 
 	play->setSize("55%", "40%");
 	play->setPosition("25%", "30%");
 	play->setTextSize(25);
 	play->getRenderer()->setFont(latoBold);
-	play->getRenderer()->setBackgroundColor(niceGreen);
-	play->getRenderer()->setBackgroundColorHover(darkerGreen);
-	play->getRenderer()->setBackgroundColorDown(darkerGreen);
-	play->getRenderer()->setTextColor(lightBlue);
+	play->getRenderer()->setBackgroundColor(lightBlue);
+	play->getRenderer()->setBackgroundColorHover(darkBlue);
+	play->getRenderer()->setBackgroundColorDown(darkBlue);
+	play->getRenderer()->setTextColor(darkGrey);
+	play->getRenderer()->setBorders(false);
 	play->setText("P L A Y");
 	play->connect("pressed", &GuiManager::playReq, this);
 
-	isReady->setSize("10%", "40%");
-	isReady->setPosition("85%", "30%");
-	isReady->connect("checked", &GuiManager::toggleReady, this);
-	isReady->connect("unchecked", &GuiManager::toggleReady, this);
+
 
 
 
@@ -454,7 +517,7 @@ void GuiManager::init()
 	resetGame->getRenderer()->setBackgroundColor(lightBlue);
 	resetGame->getRenderer()->setBackgroundColorHover(niceRed);
 	resetGame->getRenderer()->setBackgroundColorDown(darkerRed);
-	resetGame->getRenderer()->setBorderColor(darkerRed);
+	resetGame->getRenderer()->setBorders(false);
 	resetGame->connect("pressed", [&]() {
 		Client::instance()->resetSoloGame();
 	});
@@ -469,7 +532,7 @@ void GuiManager::init()
 	quitGame->getRenderer()->setBackgroundColor(lightBlue);
 	quitGame->getRenderer()->setBackgroundColorHover(niceRed);
 	quitGame->getRenderer()->setBackgroundColorDown(darkerRed);
-	quitGame->getRenderer()->setBorderColor(darkerRed);
+	quitGame->getRenderer()->setBorders(false);
 	quitGame->connect("pressed", [&]() {
 		Client::instance()->resetSoloGame();
 		Client::instance()->setColor("");
@@ -483,7 +546,9 @@ void GuiManager::init()
 	//message box
 	messageBoxBody->setSize(300, 120);
 	messageBoxBody->setPosition(350, 380);
-	messageBoxBody->getRenderer()->setBackgroundColor(darkBlue);
+	messageBoxBody->getRenderer()->setBackgroundColor(lightBlue);
+	messageBoxBody->getRenderer()->setBorders(2);
+	messageBoxBody->getRenderer()->setBorderColor(borders);
 	
 	messageInfo->setAutoSize(true);
 	messageInfo->setPosition("25%", "10%");
@@ -494,12 +559,11 @@ void GuiManager::init()
 	dismiss->setSize("30%", "30%");
 	dismiss->setText("O K");
 	dismiss->setTextSize(18);
+	dismiss->getRenderer()->setTextColor(lightBlue);
 	dismiss->getRenderer()->setFont(latoDefault);
-	dismiss->getRenderer()->setBackgroundColor(niceGreen);
-	dismiss->getRenderer()->setBackgroundColorHover(darkerGreen);
-	dismiss->getRenderer()->setBackgroundColorDown(darkerGreen);
-	dismiss->getRenderer()->setBorders(0);;
+	dismiss->getRenderer()->setBackgroundColor(darkGrey);
+	dismiss->getRenderer()->setBackgroundColorHover(sf::Color(20,20,20,255));
+	dismiss->getRenderer()->setBackgroundColorDown(sf::Color(15, 15, 15, 255));
+	dismiss->getRenderer()->setBorders(false);
 	dismiss->connect("pressed", &GuiManager::dissmissMsg, this);
 }
-
-

@@ -2,12 +2,13 @@
 #include "Server.h"
 
 Queue<sf::Packet> communicationQueue;
+Queue<Player*> playersToRemove;
 
 Player::Player(sf::TcpSocket *socket, std::string login)
-	: client(socket), login(login), id(rand() % 9999 + 1000), status(Status::Idle)
+	: client(socket), login(login), id(rand() % 8999 + 1000), status(Status::Idle)
 {
 	for (auto p : Server::instance()->getPlayersList()) {
-		while (p->getId() == id) id = rand() % 9999 + 1000;
+		while (p->getId() == id) id = rand() % 8999 + 1000;
 	}
 	client->setBlocking(true);
 }
@@ -25,6 +26,7 @@ void Player::communicate() {
 		}
 		else if (client->receive(packet) == sf::Socket::Status::Disconnected) {
 			status = Status::Disconnected;
+			playersToRemove.push(this);
 		}
 	}
 }

@@ -22,6 +22,7 @@ public:
 	int getId();
 	Player *getWhite();
 	Player *getBlack();
+	void disconnectPlayer(Player*);
 	Board getBoard();
 	GameState updateGameInstance(int);
 	GameState getCurrentGameState();

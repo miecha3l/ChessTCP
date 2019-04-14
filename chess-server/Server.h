@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Network.hpp>
 #include "Player.h"
+#include "GameInstance.h"
 #include <iostream>
 #include <string>
 
@@ -34,7 +35,6 @@ private:
 public:
 	static Server *instance();
 	void init();
-
 	int playersCount();
 	Player* getPlayer(int id);
 	void matchPlayers(int, int);

@@ -78,6 +78,9 @@ void Client::handleResponse() {
 			Response response = Response::parse(resp);
 			switch (response.getType()) {
 			case Response::Type::GameInit:
+				GuiManager::instance()->setLobbyUI(false);
+				GuiManager::instance()->setMultiGameUI(true);
+
 				for (int i = 0; i < 5; ++i) color.push_back(response.handle()[i]);
 				for (int i = 6; i < response.handle().size(); i++) initialGs.push_back(response.handle()[i]);
 				gs = GameState(initialGs);
@@ -88,14 +91,36 @@ void Client::handleResponse() {
 
 			case Response::Type::GameUpdate:
 				gs = GameState(response.handle());
+				GuiManager::instance()->setCurrentTurnLabel(gs.getCurrentGameTurn());
 				break;
 
 			case Response::Type::GameOver:
 				gameOverReason = response.handle();
-				inGame = false;
-				gs = GameState("");
-				isMatchReady = false;
-				isReady = false;
+				if (gameOverReason == "enemy_disconnected") {
+					gs = GameState("");
+					inGame = false;
+					isMatchReady = false;
+					matchName.clear();
+					isReady = false;
+					Client::instance()->setCurrentScreen(Client::Screen::Lobby);
+					GuiManager::instance()->setMultiGameUI(false);
+					GuiManager::instance()->setLobbyUI(false, true);
+					GuiManager::instance()->displayMessage("Enemy disconnected");
+				}
+
+				else if (gameOverReason == "you_disconnected") {
+					gs = GameState("");
+					inGame = false;
+					isMatchReady = false;
+					matchName.clear();
+					isReady = false;
+					Client::instance()->setCurrentScreen(Client::Screen::Menu);
+					GuiManager::instance()->setMultiGameUI(false);
+					GuiManager::instance()->setMenuUI(false, true);
+					GuiManager::instance()->displayMessage("You disconnected");
+				}
+
+
 				color.clear();
 				serverConnection.setBlocking(false);
 				gameOverReason.clear();

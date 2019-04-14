@@ -83,8 +83,13 @@ public:
 	void setMenuUI(bool);
 	void setMenuUI(bool, bool);
 
-	void setInGameUI(bool);
-	void setInGameUI(bool, bool);
+	void setSoloGameUI(bool);
+	void setSoloGameUI(bool, bool);
+
+	void setMultiGameUI(bool);
+	void setMultiGameUI(bool, bool);
+
+	void setCurrentTurnLabel(std::string);
 
 	void setMessageBox(bool);
 	void displayMessage(std::string);

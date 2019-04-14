@@ -49,6 +49,7 @@ void GuiManager::setInfoBoardInfo()
 		unmatchButton->getRenderer()->setTextColor(lightBlue);
 		unmatchButton->getRenderer()->setBorders(false);
 		unmatchButton->connect("pressed", [&](){
+			unmatchButton->setVisible(false);
 			if (!Client::instance()->getMatchName().empty()) {
 				std::string msg = "req/unmatch/";
 				Client::instance()->addReqToQueue(msg.append(Client::instance()->getMatchName()).append("/").append(Client::instance()->getName()));
@@ -100,16 +101,36 @@ void GuiManager::setMenuUI(bool s1, bool s2)
 	mainUILayout->setVisible(s2);
 }
 
-void GuiManager::setInGameUI(bool s)
+void GuiManager::setSoloGameUI(bool s)
 {
 	soloGameLayout->setEnabled(s);
 	soloGameLayout->setVisible(s);
 }
 
-void GuiManager::setInGameUI(bool s1, bool s2)
+void GuiManager::setSoloGameUI(bool s1, bool s2)
 {
 	soloGameLayout->setEnabled(s1);
 	soloGameLayout->setVisible(s2);
+}
+
+void GuiManager::setMultiGameUI(bool s)
+{
+	multiGameLayout->setEnabled(s);
+	multiGameLayout->setVisible(s);
+}
+
+void GuiManager::setMultiGameUI(bool s1, bool s2)
+{
+	multiGameLayout->setEnabled(s1);
+	multiGameLayout->setVisible(s2);
+}
+
+void GuiManager::setCurrentTurnLabel(std::string s)
+{
+	std::string con = "Current turn: ";
+	currentTurn->setVisible(false);
+	currentTurn->setText(con.append(s));
+	currentTurn->setVisible(true);
 }
 
 void GuiManager::setMessageBox(bool s)
@@ -128,6 +149,9 @@ void GuiManager::dissmissMsg() {
 	switch (Client::instance()->getCurrentScreen()) {
 	case Client::Screen::Lobby:
 		setLobbyUI(true);
+		setMultiGameUI(false);
+		setSoloGameUI(false);
+		setMenuUI(false);
 		if (Client::instance()->getName().empty()) {
 			Client::instance()->setCurrentScreen(Client::Screen::Menu);
 			setLobbyUI(false);
@@ -137,16 +161,22 @@ void GuiManager::dissmissMsg() {
 
 	case Client::Screen::Menu:
 		setMenuUI(true);
+		setMultiGameUI(false);
+		setSoloGameUI(false);
+		setLobbyUI(false);
 		break;
 
 	case Client::Screen::OfflineGame:
-		setInGameUI(true);
+		setSoloGameUI(true);
+		setMultiGameUI(false);
+		setMenuUI(false);
+		setLobbyUI(false);
 		break;
 
 	case Client::Screen::OnlineGame:
 		setLobbyUI(true);
 		setMenuUI(false);
-		setInGameUI(false);
+		setSoloGameUI(false);
 		Client::instance()->setCurrentScreen(Client::Screen::Lobby);
 		break;
 	}
@@ -201,9 +231,9 @@ void GuiManager::getPendingInvites() {
 					if (Client::instance()->getMatchName().empty()) {
 						std::string msg = "req/match_acc/";
 						Client::instance()->addReqToQueue(msg.append(Client::instance()->getRequester()).append("/").append(Client::instance()->getName()));
-						invitesPanel->removeAllWidgets();
 						invitesPanel->setEnabled(false);
 						invitesPanel->setVisible(false);
+						invitesPanel->removeAllWidgets();
 						setInfoBoardInfo();
 					}
 				});
@@ -224,9 +254,9 @@ void GuiManager::getPendingInvites() {
 					std::string msg = "req/match_dec/";
 					Client::instance()->setMatchReq(false);
 					Client::instance()->addReqToQueue(msg.append(Client::instance()->getRequester()).append("/").append(Client::instance()->getName()));
-					invitesPanel->removeAllWidgets();
 					invitesPanel->setEnabled(false);
 					invitesPanel->setVisible(false);
+					invitesPanel->removeAllWidgets();
 				});
 			}
 		}
@@ -282,6 +312,7 @@ GuiManager::GuiManager() {
 
 
 
+	//solo game UI init
 	soloGameLayout = tgui::VerticalLayout::create();
 	quitGame = tgui::Button::create();
 	resetGame = tgui::Button::create();
@@ -292,20 +323,20 @@ GuiManager::GuiManager() {
 	soloGameLayout->setEnabled(false);
 	mainUI.add(soloGameLayout);
 
-	/*multiGameLayout = tgui::VerticalLayout::create();
+
+
+	//multi game UI init
+	multiGameLayout = tgui::VerticalLayout::create();
 	disconnect = tgui::Button::create();
 	forfeit = tgui::Button::create();
-	currentTurn = tgui::Label::create();*/
+	currentTurn = tgui::Label::create();
 
-	/*multiGameLayout->insert(0, soundsOn, "soundsOn");
-	multiGameLayout->insert(1, soundsCheckBoxLabel, "soundsLabel");
-	multiGameLayout->insert(2, highlightLegals, "highlightLegals");
-	multiGameLayout->insert(3, highlithCheckBoxLabel, "highlightLabel");
-	multiGameLayout->insert(4, currentTurn, "currentTurn");
-	multiGameLayout->insert(5, forfeit, "forfeit");
-	multiGameLayout->insert(6, disconnect, "disconnect");
+	multiGameLayout->insert(0, currentTurn, "currentTurn");
+	multiGameLayout->insert(1, forfeit, "forfeit");
+	multiGameLayout->insert(2, disconnect, "disconnect");
 	multiGameLayout->setVisible(false);
-	multiGameLayout->setEnabled(false);*/
+	multiGameLayout->setEnabled(false);
+	mainUI.add(multiGameLayout);
 
 
 
@@ -335,10 +366,7 @@ tgui::Gui * GuiManager::getMainUIHandle()
 
 void GuiManager::drawGui()
 {
-	sf::Mutex mutex;
-	mutex.lock();
 	mainUI.draw();
-	mutex.unlock();
 }
 
 bool GuiManager::mainUIHandleFree()
@@ -385,7 +413,7 @@ void GuiManager::init()
 		Client::instance()->setCurrentScreen(Client::Screen::OfflineGame);
 		Client::instance()->setColor("white");
 		setMenuUI(false);
-		setInGameUI(true);
+		setSoloGameUI(true);
 	});
 
 	playWithFriend->setSize( "100%", "40%" );
@@ -539,8 +567,53 @@ void GuiManager::init()
 		Client::instance()->setGameState(Board());
 		Client::instance()->setCurrentScreen(Client::Screen::Menu);
 		setMenuUI(true);
-		setInGameUI(false);
+		setSoloGameUI(false);
 	});
+
+
+
+	//multi UI setup
+	multiGameLayout->setSize(250, 560);
+	multiGameLayout->setPosition(700, 200);
+
+	currentTurn->setText("Current turn: White");
+	currentTurn->setTextSize(22);
+	currentTurn->getRenderer()->setFont(latoBold);
+	currentTurn->getRenderer()->setTextColor(lightBlue);
+	currentTurn->setSize("95%", "7%");
+	currentTurn->setPosition("5%", "5%");
+
+	forfeit->setPosition("5%", "45%");
+	forfeit->setSize("95%", "8%");
+	forfeit->setText("Forfeit");
+	forfeit->setTextSize(22);
+	forfeit->getRenderer()->setTextColor(darkGrey);
+	forfeit->getRenderer()->setFont(latoDefault);
+	forfeit->getRenderer()->setTextColorDown(lightBlue);
+	forfeit->getRenderer()->setBackgroundColor(lightBlue);
+	forfeit->getRenderer()->setBackgroundColorHover(niceRed);
+	forfeit->getRenderer()->setBackgroundColorDown(darkerRed);
+	forfeit->getRenderer()->setBorders(false);
+	forfeit->connect("pressed", [&]() {
+		//send forfeit message to server
+	});
+
+	disconnect->setPosition("5%", "55%");
+	disconnect->setSize("95%", "8%");
+	disconnect->setText("Disconnect");
+	disconnect->setTextSize(22);
+	disconnect->getRenderer()->setTextColor(darkGrey);
+	disconnect->getRenderer()->setFont(latoDefault);
+	disconnect->getRenderer()->setTextColorDown(lightBlue);
+	disconnect->getRenderer()->setBackgroundColor(lightBlue);
+	disconnect->getRenderer()->setBackgroundColorHover(niceRed);
+	disconnect->getRenderer()->setBackgroundColorDown(darkerRed);
+	disconnect->getRenderer()->setBorders(false);
+	disconnect->connect("pressed", [&]() {
+		std::string req = "req/disconnect/";
+		Client::instance()->addReqToQueue(req.append(Client::instance()->getMatchName()).append("/").append(Client::instance()->getName()));
+	});
+
 
 
 	//message box

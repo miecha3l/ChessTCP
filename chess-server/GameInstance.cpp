@@ -95,3 +95,8 @@ Board GameInstance::getBoard()
 {
 	return gameBoard;
 }
+
+void GameInstance::disconnectPlayer(Player*p) {
+	if (p == white) white = NULL;
+	else if (p == black) black = NULL;
+}

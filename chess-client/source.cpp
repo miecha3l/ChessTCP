@@ -126,14 +126,17 @@ void windowThread() {
 		}
 
 		client.clear();
-		if (Client::instance()->isInGame()) {
-			GuiManager::instance()->setLobbyUI(false);
-			Client::instance()->setCurrentScreen(Client::Screen::OnlineGame);
+		if (Client::instance()->getCurrentScreen() == Client::Screen::OnlineGame) {
 			client.draw(background);
 			if (isPieceSelected) {
 				drawLegalMoves(pieceSelected, Client::instance()->getColor());
 			}
 			drawGameState(Client::instance()->getGameState(), client, Client::instance()->getColor());
+
+			if (GuiManager::instance()->isShowingMessageBox()) {
+				client.draw(dimm);
+				GuiManager::instance()->setMenuUI(false, true);
+			}
 		}
 		else {
 

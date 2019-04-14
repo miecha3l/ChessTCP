@@ -5,6 +5,15 @@
 extern std::list<GameInstance*> gameInstances;
 extern std::map<Player*, GameInstance*> gameOf;
 
+
+GameInstance* GetGameOf(Player*p) {
+	auto outcome = gameOf.find(p);
+	if (outcome == gameOf.end()) {
+		return NULL;
+	}
+	else return outcome->second;
+}
+
 Request::Request(Type t, std::string cont, std::string s, std::string r)
 	: type(t), content(cont), sender(std::stoi(s)), receiver(NULL)
 {
@@ -55,12 +64,14 @@ void Request::handle() {
 		}
 
 		else if (content == "unmatch") {
-			Server::instance()->removeMatch(sender);
-			Server::instance()->removeMatch(receiver);
-			sf::Packet resp;
-			resp << "notification/unmatch";
-			Server::instance()->getPlayer(sender)->getClient()->send(resp);
-			Server::instance()->getPlayer(receiver)->getClient()->send(resp);
+			if (Server::instance()->getPlayer(sender)->getPlayersStatus() != Player::Status::InGame) {
+				Server::instance()->removeMatch(sender);
+				Server::instance()->removeMatch(receiver);
+				sf::Packet resp;
+				resp << "notification/unmatch";
+				Server::instance()->getPlayer(sender)->getClient()->send(resp);
+				Server::instance()->getPlayer(receiver)->getClient()->send(resp);
+			}
 		}
 
 		else if (content == "play") {
@@ -86,6 +97,51 @@ void Request::handle() {
 				Server::instance()->getPlayer(receiver)->getClient()->send(resp);
 				resp.clear();
 				colorB.clear();
+			}
+		}
+
+		else if (content == "disconnect") {
+			if (Server::instance()->getPlayer(sender)->getPlayersStatus() == Player::Status::InGame) {
+				GetGameOf(Server::instance()->getPlayer(sender))->disconnectPlayer(Server::instance()->getPlayer(sender));
+				GetGameOf(Server::instance()->getPlayer(receiver))->disconnectPlayer(Server::instance()->getPlayer(sender));
+				Server::instance()->getPlayer(sender)->setPlayersStatus(Player::Status::Idle);
+				Server::instance()->getPlayer(receiver)->setPlayersStatus(Player::Status::Idle);
+				Server::instance()->removeMatch(sender);
+				Server::instance()->removeMatch(receiver);
+				sf::Packet resp;
+				resp << "game_over/enemy_disconnected";
+				Server::instance()->getPlayer(receiver)->getClient()->send(resp);
+
+				resp.clear();
+				resp << "game_over/you_disconnected";
+				Server::instance()->getPlayer(sender)->getClient()->send(resp);
+
+				gameInstances.remove(GetGameOf(Server::instance()->getPlayer(sender)));
+				delete GetGameOf(Server::instance()->getPlayer(sender));
+				gameOf.erase(Server::instance()->getPlayer(sender));
+				gameOf.erase(Server::instance()->getPlayer(receiver));
+			}
+		}
+
+		else if (content == "forfeit") {
+			if (Server::instance()->getPlayer(sender)->getPlayersStatus() == Player::Status::InGame) {
+				GetGameOf(Server::instance()->getPlayer(sender))->disconnectPlayer(Server::instance()->getPlayer(sender));
+				GetGameOf(Server::instance()->getPlayer(receiver))->disconnectPlayer(Server::instance()->getPlayer(sender));
+				Server::instance()->getPlayer(sender)->setPlayersStatus(Player::Status::Idle);
+				Server::instance()->getPlayer(receiver)->setPlayersStatus(Player::Status::Idle);
+
+				sf::Packet resp;
+				resp << "game_over/enemy_forfeited";
+				Server::instance()->getPlayer(receiver)->getClient()->send(resp);
+
+				resp.clear();
+				resp << "game_over/you_forfeited";
+				Server::instance()->getPlayer(sender)->getClient()->send(resp);
+
+				gameInstances.remove(GetGameOf(Server::instance()->getPlayer(sender)));
+				delete GetGameOf(Server::instance()->getPlayer(sender));
+				gameOf.erase(Server::instance()->getPlayer(sender));
+				gameOf.erase(Server::instance()->getPlayer(receiver));
 			}
 		}
 

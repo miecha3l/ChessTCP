@@ -76,6 +76,8 @@ void Server::deletePlayer(Player*p) {
 			break;
 		}
 	}
+
+
 	//delete players game
 	if (getGameOf(p) != NULL) {
 		sf::Packet cont;
@@ -99,19 +101,16 @@ void Server::deletePlayer(Player*p) {
 		}
 	}
 
+
 	//deleting all connections
 	if (getPlayerMatch(p) != NULL) {
-		sf::Packet msg;
-		std::string cont = "notification/unmatch";
 		getPlayerMatch(p)->setPlayersStatus(Player::Status::Idle);
-		msg << cont;
-		getPlayerMatch(p)->getClient()->send(msg);
 		matchOf.erase(getPlayerMatch(p));
 	}
-
 	matchOf.erase(p);
 	playerOf.erase(p->getId());
 	gameOf.erase(p);
+
 
 	//deleting players obj
 	delete p;

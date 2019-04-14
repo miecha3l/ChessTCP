@@ -73,11 +73,14 @@ void Client::handleResponse() {
 	sf::Mutex mutex;
 	while (true) {
 		if (responses.size() > 0) {
+			
 			std::string resp;
 			responses.pop() >> resp;
 			Response response = Response::parse(resp);
 			switch (response.getType()) {
 			case Response::Type::GameInit:
+				GuiManager::instance()->setDrawLock(true);
+
 				GuiManager::instance()->setLobbyUI(false);
 				GuiManager::instance()->setMultiGameUI(true);
 
@@ -87,6 +90,8 @@ void Client::handleResponse() {
 				currentScreen = Screen::OnlineGame;
 				inGame = true;
 				serverConnection.setBlocking(true);
+
+				GuiManager::instance()->setDrawLock(false);
 				break;
 
 			case Response::Type::GameUpdate:
@@ -95,6 +100,7 @@ void Client::handleResponse() {
 				break;
 
 			case Response::Type::GameOver:
+				GuiManager::instance()->setDrawLock(true);
 				gameOverReason = response.handle();
 				if (gameOverReason == "enemy_disconnected") {
 					gs = GameState("");
@@ -124,6 +130,7 @@ void Client::handleResponse() {
 				color.clear();
 				serverConnection.setBlocking(false);
 				gameOverReason.clear();
+				GuiManager::instance()->setDrawLock(false);
 				break;
 
 			case Response::Type::Match:
@@ -134,38 +141,36 @@ void Client::handleResponse() {
 				}
 				if (response.handle() == "acc") {
 					if (matchName.empty()) {
+						GuiManager::instance()->setDrawLock(true);
+
 						matchReq = false;
 						matchName = requester;
 						requester.clear();
 						GuiManager::instance()->setInfoBoardInfo();
 						while(!GuiManager::instance()->mainUIHandleFree()){}
+
+						GuiManager::instance()->setDrawLock(false);
 					}
 				}
 				if (response.handle() == "dec") {
+					GuiManager::instance()->setDrawLock(true);
 					matchReq = false;
 					std::cout << "match declined" << std::endl;
 					requester.clear();
 					GuiManager::instance()->displayMessage("Match declined");
+					GuiManager::instance()->setDrawLock(false);
 				}
 				
 				break;
 
 			case Response::Type::Notification:
-				if (response.handle() == "is_notready") {
-					isMatchReady = false;
-
-					GuiManager::instance()->setInfoBoardInfo();
-				}
-				else if (response.handle() == "is_ready") {
-					isMatchReady = true;
-
-					GuiManager::instance()->setInfoBoardInfo();
-				}
-				else if (response.handle() == "unmatch") {
+				if (response.handle() == "unmatch") {
+					GuiManager::instance()->setDrawLock(true);
 					matchName = "";
 					isMatchReady = false;
 					matchReq = false;
 					GuiManager::instance()->displayMessage("unmatched");
+					GuiManager::instance()->setDrawLock(false);
 				}
 				break;
 
@@ -183,7 +188,8 @@ void Client::handleResponse() {
 				}
 				onlinePlayersUpToDate = true;
 				break;
-			}	
+			}
+			
 		}
 		Sleep(250);
 	}

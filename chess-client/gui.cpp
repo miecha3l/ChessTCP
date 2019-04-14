@@ -49,7 +49,6 @@ void GuiManager::setInfoBoardInfo()
 		unmatchButton->getRenderer()->setTextColor(lightBlue);
 		unmatchButton->getRenderer()->setBorders(false);
 		unmatchButton->connect("pressed", [&](){
-			unmatchButton->setVisible(false);
 			if (!Client::instance()->getMatchName().empty()) {
 				std::string msg = "req/unmatch/";
 				Client::instance()->addReqToQueue(msg.append(Client::instance()->getMatchName()).append("/").append(Client::instance()->getName()));
@@ -131,6 +130,11 @@ void GuiManager::setCurrentTurnLabel(std::string s)
 	currentTurn->setVisible(false);
 	currentTurn->setText(con.append(s));
 	currentTurn->setVisible(true);
+}
+
+void GuiManager::setDrawLock(bool s)
+{
+	lockGuiDraw = s;
 }
 
 void GuiManager::setMessageBox(bool s)
@@ -366,7 +370,9 @@ tgui::Gui * GuiManager::getMainUIHandle()
 
 void GuiManager::drawGui()
 {
-	mainUI.draw();
+	if (!lockGuiDraw) {
+		mainUI.draw();
+	}
 }
 
 bool GuiManager::mainUIHandleFree()

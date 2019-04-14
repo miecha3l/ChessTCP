@@ -62,6 +62,7 @@ private:
 	sf::Color darkerRed = sf::Color(130, 37, 49, 255);
 	sf::Color borders = sf::Color(15, 15, 15, 255);
 
+	bool lockGuiDraw = false;
 	bool showingMessageBox = false;
 	bool messageBoxDissmised = true;
 	void dissmissMsg();
@@ -90,6 +91,8 @@ public:
 	void setMultiGameUI(bool, bool);
 
 	void setCurrentTurnLabel(std::string);
+
+	void setDrawLock(bool);
 
 	void setMessageBox(bool);
 	void displayMessage(std::string);

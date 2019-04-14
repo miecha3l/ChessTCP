@@ -174,7 +174,6 @@ void windowThread() {
 					client.draw(dimm);
 				}
 			}
-			
 		}
 		GuiManager::instance()->drawGui();
 		client.display();

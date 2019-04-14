@@ -27,7 +27,7 @@ sf::Sound moveSound;
 const int tileDims = 70;
 const int offset = 100;
 
-void drawGameState(GameState gs, sf::RenderWindow &w, std::string color);
+void drawGameState(GameState gs, std::string color);
 CompressedPiece getPieceClicked(sf::RenderWindow &w, GameState gs, std::string color);
 int getClickedMove(CompressedPiece &p, std::string color);
 void drawLegalMoves(CompressedPiece p, std::string color);
@@ -125,57 +125,69 @@ void windowThread() {
 			}
 		}
 
-		client.clear();
-		if (Client::instance()->getCurrentScreen() == Client::Screen::OnlineGame) {
-			client.draw(background);
-			if (isPieceSelected) {
-				drawLegalMoves(pieceSelected, Client::instance()->getColor());
-			}
-			drawGameState(Client::instance()->getGameState(), client, Client::instance()->getColor());
 
-			if (GuiManager::instance()->isShowingMessageBox()) {
-				client.draw(dimm);
-				GuiManager::instance()->setMenuUI(false, true);
+		if (Client::instance()->getCurrentScreen() == Client::Screen::OnlineGame) {
+			if (isPieceSelected) GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
+				&drawLegalMoves, pieceSelected, Client::instance()->getColor());
+
+
+			else if (GuiManager::instance()->isShowingMessageBox()) {
+				if (isPieceSelected)GuiManager::instance()->drawGui(background, dimm, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
+					&drawLegalMoves, pieceSelected, Client::instance()->getColor());
+
+				else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor());
 			}
+			else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor());
+
 		}
+
 		else {
 
 			if (bgLoaded) bgLoaded = false;
 
 
 			if (Client::instance()->getCurrentScreen() == Client::Screen::Menu) {
-				client.draw(splash);
 				if (GuiManager::instance()->isShowingMessageBox()) {
-					client.draw(dimm);
+					GuiManager::instance()->drawGui(splash, dimm);
 					GuiManager::instance()->setMenuUI(false, true);
 				}
+				else GuiManager::instance()->drawGui(splash);
 			}
 
 
 			else if (Client::instance()->getCurrentScreen() == Client::Screen::Lobby) {
-				if (Client::instance()->getName().empty()) GuiManager::instance()->displayMessage("You're offline, sorry");
-				client.draw(lobby);
+
 				if (GuiManager::instance()->isShowingMessageBox()) {
-					client.draw(dimm);
+					GuiManager::instance()->drawGui(lobby, dimm);
 					GuiManager::instance()->setLobbyUI(false, true);
 				}
+				else GuiManager::instance()->drawGui(lobby);
+
+				if (Client::instance()->getName().empty()) GuiManager::instance()->displayMessage("You're offline, sorry");
 			}
 
 
 			else if (Client::instance()->getCurrentScreen() == Client::Screen::OfflineGame) {
-				client.draw(background);
+
+				if (isPieceSelected) GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
+																		&drawLegalMoves, pieceSelected, Client::instance()->getColor());
+
+
+				else if (GuiManager::instance()->isShowingMessageBox()) {			
+					if(isPieceSelected)GuiManager::instance()->drawGui(background, dimm, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
+																			&drawLegalMoves, pieceSelected, Client::instance()->getColor());
+
+					else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor());
+				}
+				else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor());
+
+
 				if (Client::instance()->getSoloGameInstance()->getCurrentTurn() != Client::instance()->getColor()) {
 					isPieceSelected = false;
 					pieceSelected = CompressedPiece("not_found;00;;");
 				}
-				if (isPieceSelected) drawLegalMoves(pieceSelected, Client::instance()->getColor());
-				drawGameState(Client::instance()->getGameState(), client, Client::instance()->getColor());
-				if (GuiManager::instance()->isShowingMessageBox()) {
-					client.draw(dimm);
-				}
 			}
 		}
-		GuiManager::instance()->drawGui();
 		client.display();
 	}
 }
@@ -190,7 +202,7 @@ int main() {
 	return 0;
 }
 
-void drawGameState(GameState gs, sf::RenderWindow &w, std::string color) {
+void drawGameState(GameState gs, std::string color) {
 	
 	std::string texturePathRoot = "assets/";
 	for (auto p : gs.getWhitePieces()) {
@@ -213,7 +225,7 @@ void drawGameState(GameState gs, sf::RenderWindow &w, std::string color) {
 		piece.setTexture(texture);
 		piece.setPosition(screenPos);
 
-		w.draw(piece);
+		client.draw(piece);
 	}
 
 	for (auto p : gs.getBlackPieces()) {
@@ -237,7 +249,7 @@ void drawGameState(GameState gs, sf::RenderWindow &w, std::string color) {
 		piece.setTexture(texture);
 		piece.setPosition(screenPos);
 
-		w.draw(piece);
+		client.draw(piece);
 	}
 }
 

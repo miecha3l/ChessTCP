@@ -169,7 +169,7 @@ void Client::handleResponse() {
 					matchName = "";
 					isMatchReady = false;
 					matchReq = false;
-					GuiManager::instance()->displayMessage("unmatched");
+					GuiManager::instance()->setInfoBoardInfo();
 					GuiManager::instance()->setDrawLock(false);
 				}
 				break;

@@ -375,6 +375,69 @@ void GuiManager::drawGui()
 	}
 }
 
+void GuiManager::drawGui(sf::Sprite bg)
+{
+	if (!lockGuiDraw) {
+		client.clear();
+		client.draw(bg);
+		mainUI.draw();
+	}
+}
+
+void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm)
+{
+	if (!lockGuiDraw) {
+		client.clear();
+		client.draw(bg);
+		client.draw(dimm);
+		mainUI.draw();
+	}
+}
+
+void GuiManager::drawGui(sf::Sprite bg, void(*f)(GameState, std::string color), GameState p1, std::string p3)
+{
+	if (!lockGuiDraw) {
+		client.clear();
+		client.draw(bg);
+		(*f)(p1, p3);
+		mainUI.draw();
+	}
+}
+
+void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*f)(GameState, std::string color), GameState p1, std::string p3)
+{
+	if (!lockGuiDraw) {
+		client.clear();
+		client.draw(bg);
+		(*f)(p1, p3);
+		client.draw(dimm);
+		mainUI.draw();
+	}
+}
+
+void GuiManager::drawGui(sf::Sprite bg, void(*drawGs)(GameState, std::string color), GameState p1, std::string p3, void(*drawLegals)(CompressedPiece, std::string), CompressedPiece p4, std::string p5)
+{
+	if (!lockGuiDraw) {
+		client.clear();
+		client.draw(bg);
+		(*drawGs)(p1, p3);
+		(*drawLegals)(p4, p5);
+		mainUI.draw();
+	}
+}
+
+void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*drawGs)(GameState, std::string color), GameState p1, std::string p3, void(*drawLegals)(CompressedPiece, std::string), CompressedPiece p4, std::string p5)
+{
+	if (!lockGuiDraw) {
+		client.clear();
+		client.draw(bg);
+		(*drawGs)(p1, p3);
+		(*drawLegals)(p4, p5);
+		client.draw(dimm);
+		mainUI.draw();
+	}
+}
+
 bool GuiManager::mainUIHandleFree()
 {
 	return !updatingInfoBoard;

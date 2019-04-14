@@ -2,6 +2,7 @@
 #include "SFML/Graphics.hpp"
 #include "TGUI/TGUI.hpp"
 #include <iostream>
+#include "GameState.h"
 
 extern sf::RenderWindow client;
 
@@ -72,8 +73,34 @@ public:
 	void getPendingInvites();
 	static GuiManager* instance();
 	tgui::Gui* getMainUIHandle();
+
+	//default
 	void drawGui();
+
+	//draw only with bg
+	void drawGui(sf::Sprite bg);
+
+	//draw with bg & dimm
+	void drawGui(sf::Sprite bg, sf::RectangleShape);
+
+	//draw with gs 
+	void drawGui(sf::Sprite bg, void(*f)(GameState, std::string color), GameState p1, std::string p3);
+
+	//draw with gs & dimm
+	void drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*f)(GameState, std::string color), GameState p1, std::string p3);
+
+	//draw with gs & legals
+	void drawGui(sf::Sprite bg, void(*drawGs)(GameState, std::string color), GameState p1, std::string p3,
+					void(*drawLegals)(CompressedPiece, std::string), CompressedPiece p4, std::string p5);
+
+	//draw with gs & legals & dimm
+	void drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*drawGs)(GameState, std::string color), GameState p1, std::string p3,
+		void(*drawLegals)(CompressedPiece, std::string), CompressedPiece p4, std::string p5);
+
+
 	bool mainUIHandleFree();
+
+
 	void highlightPendingButton();
 	void setInfoBoardInfo();
 	void setInfoBoard(bool);

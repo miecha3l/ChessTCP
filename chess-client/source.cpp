@@ -9,6 +9,7 @@
 #include <iostream>
 #include "Client.h"
 #include "SoloGame.h"
+#include <Windows.h>
 
 sf::VideoMode resolution(1000, 760);
 sf::RenderWindow client;
@@ -36,6 +37,8 @@ void windowThread() {
 	bool isPieceSelected = false;
 	bool bgLoaded = false;
 	CompressedPiece pieceSelected("not_found;00;;");
+	sf::RectangleShape dimm(sf::Vector2f(1000, 760));
+	dimm.setFillColor(sf::Color(20, 20, 20, 150));
 	bgForWhite.loadFromFile("assets/backgroundWhite.png");
 	bgForBlack.loadFromFile("assets/backgroundBlack.png");
 	splashArt.loadFromFile("assets/splash.png");
@@ -44,10 +47,6 @@ void windowThread() {
 	lobby.setTexture(lobbyBg);
 	moveSoundBuffer.loadFromFile("assets/move.wav");
 	moveSound.setBuffer(moveSoundBuffer);
-	sf::RectangleShape dimm(sf::Vector2f(1000, 760));
-	dimm.setFillColor(sf::Color(20, 20, 20, 150));
-	GuiManager::instance()->init();
-
 	client.create(resolution, "Chess");
 	while (client.isOpen()) {
 		if (!bgLoaded && !Client::instance()->getColor().empty()) {
@@ -194,6 +193,7 @@ void windowThread() {
 
 
 int main() {
+	GuiManager::instance()->init();
 	sf::Thread clientWindow(&windowThread);
 
 	clientWindow.launch();

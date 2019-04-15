@@ -277,83 +277,6 @@ GuiManager::GuiManager() {
 	latoBold.loadFromFile("assets/Lato-Bold.ttf");
 	latoDefault.loadFromFile("assets/Lato-Regular.ttf");
 
-	//main UI init
-	mainUILayout = tgui::VerticalLayout::create();
-	playSolo = tgui::Button::create();
-	playWithFriend = tgui::Button::create();
-
-	
-	mainUILayout->insert(0, playWithFriend, "Play with friend");
-	mainUILayout->insert(1, playSolo, "Play solo");
-	mainUI.add(mainUILayout);
-
-	//lobby UI init
-	lobbyUILayout = tgui::VerticalLayout::create();
-	topRow = tgui::HorizontalLayout::create();
-	bottomRow = tgui::HorizontalLayout::create();
-	sendInvite = tgui::Button::create();
-	showInvites = tgui::Button::create();
-	invitesPanel = tgui::Panel::create();
-	inputUserName = tgui::TextBox::create();
-	infoBoard = tgui::Panel::create();
-	backToMenu = tgui::Button::create();
-	play = tgui::Button::create();
-
-	topRow->insert(0, inputUserName, "inputUserName");
-	topRow->insert(1, sendInvite, "sendInvite");
-	topRow->insert(2, showInvites, "showInvites");
-
-	bottomRow->insert(0, backToMenu, "backToMenu");
-	bottomRow->insert(1, play, "play");
-
-	lobbyUILayout->insert(0, topRow, "topRow");
-	lobbyUILayout->insert(1, invitesPanel, "invitesPanel");
-	lobbyUILayout->insert(2, infoBoard, "infoBoard");
-	lobbyUILayout->insert(3, bottomRow, "bottomRow");
-	lobbyUILayout->setVisible(false);
-	lobbyUILayout->setEnabled(false);
-	mainUI.add(lobbyUILayout);
-
-
-
-	//solo game UI init
-	soloGameLayout = tgui::VerticalLayout::create();
-	quitGame = tgui::Button::create();
-	resetGame = tgui::Button::create();
-
-	soloGameLayout->insert(0, resetGame, "resetGame");
-	soloGameLayout->insert(1, quitGame, "quitGame");
-	soloGameLayout->setVisible(false);
-	soloGameLayout->setEnabled(false);
-	mainUI.add(soloGameLayout);
-
-
-
-	//multi game UI init
-	multiGameLayout = tgui::VerticalLayout::create();
-	disconnect = tgui::Button::create();
-	forfeit = tgui::Button::create();
-	currentTurn = tgui::Label::create();
-
-	multiGameLayout->insert(0, currentTurn, "currentTurn");
-	multiGameLayout->insert(1, forfeit, "forfeit");
-	multiGameLayout->insert(2, disconnect, "disconnect");
-	multiGameLayout->setVisible(false);
-	multiGameLayout->setEnabled(false);
-	mainUI.add(multiGameLayout);
-
-
-
-	//message box
-	messageBoxBody = tgui::Panel::create();
-	messageInfo = tgui::Label::create();
-	dismiss = tgui::Button::create();
-
-	messageBoxBody->add(messageInfo);
-	messageBoxBody->add(dismiss);
-	mainUI.add(messageBoxBody);
-	messageBoxBody->setEnabled(false);
-	messageBoxBody->setVisible(false);
 }
 
 GuiManager * GuiManager::instance()
@@ -461,6 +384,84 @@ void GuiManager::init()
 {
 	tgui::Theme theme("themes/TransparentGrey.txt");
 	tgui::Theme::setDefault(&theme);
+
+	//main UI init
+	mainUILayout = tgui::VerticalLayout::create();
+	playSolo = tgui::Button::create();
+	playWithFriend = tgui::Button::create();
+
+
+	mainUILayout->insert(0, playWithFriend, "Play with friend");
+	mainUILayout->insert(1, playSolo, "Play solo");
+	mainUI.add(mainUILayout);
+
+	//lobby UI init
+	lobbyUILayout = tgui::VerticalLayout::create();
+	topRow = tgui::HorizontalLayout::create();
+	bottomRow = tgui::HorizontalLayout::create();
+	sendInvite = tgui::Button::create();
+	showInvites = tgui::Button::create();
+	invitesPanel = tgui::Panel::create();
+	inputUserName = tgui::TextBox::create();
+	infoBoard = tgui::Panel::create();
+	backToMenu = tgui::Button::create();
+	play = tgui::Button::create();
+
+	topRow->insert(0, inputUserName, "inputUserName");
+	topRow->insert(1, sendInvite, "sendInvite");
+	topRow->insert(2, showInvites, "showInvites");
+
+	bottomRow->insert(0, backToMenu, "backToMenu");
+	bottomRow->insert(1, play, "play");
+
+	lobbyUILayout->insert(0, topRow, "topRow");
+	lobbyUILayout->insert(1, invitesPanel, "invitesPanel");
+	lobbyUILayout->insert(2, infoBoard, "infoBoard");
+	lobbyUILayout->insert(3, bottomRow, "bottomRow");
+	lobbyUILayout->setVisible(false);
+	lobbyUILayout->setEnabled(false);
+	mainUI.add(lobbyUILayout);
+
+
+
+	//solo game UI init
+	soloGameLayout = tgui::VerticalLayout::create();
+	quitGame = tgui::Button::create();
+	resetGame = tgui::Button::create();
+
+	soloGameLayout->insert(0, resetGame, "resetGame");
+	soloGameLayout->insert(1, quitGame, "quitGame");
+	soloGameLayout->setVisible(false);
+	soloGameLayout->setEnabled(false);
+	mainUI.add(soloGameLayout);
+
+
+
+	//multi game UI init
+	multiGameLayout = tgui::VerticalLayout::create();
+	disconnect = tgui::Button::create();
+	forfeit = tgui::Button::create();
+	currentTurn = tgui::Label::create();
+
+	multiGameLayout->insert(0, currentTurn, "currentTurn");
+	multiGameLayout->insert(1, forfeit, "forfeit");
+	multiGameLayout->insert(2, disconnect, "disconnect");
+	multiGameLayout->setVisible(false);
+	multiGameLayout->setEnabled(false);
+	mainUI.add(multiGameLayout);
+
+
+
+	//message box
+	messageBoxBody = tgui::Panel::create();
+	messageInfo = tgui::Label::create();
+	dismiss = tgui::Button::create();
+
+	messageBoxBody->add(messageInfo);
+	messageBoxBody->add(dismiss);
+	mainUI.add(messageBoxBody);
+	messageBoxBody->setEnabled(false);
+	messageBoxBody->setVisible(false);
 
 	//main UI setup
 	mainUILayout->setSize(300, 160);

@@ -48,8 +48,8 @@ void Request::handle() {
 		else if (content == "match_acc") {
 			if (Server::instance()->getPlayerMatch(Server::instance()->getPlayer(sender)) == NULL && Server::instance()->getPlayerMatch(Server::instance()->getPlayer(receiver)) == NULL ) {
 				Server::instance()->matchPlayers(sender, receiver);
-				Server::instance()->getPlayer(sender)->setPlayersStatus(Player::Status::InLobbyNotReady);
-				Server::instance()->getPlayer(receiver)->setPlayersStatus(Player::Status::InLobbyNotReady);
+				Server::instance()->getPlayer(sender)->setPlayersStatus(Player::Status::InLobbyReady);
+				Server::instance()->getPlayer(receiver)->setPlayersStatus(Player::Status::InLobbyReady);
 				sf::Packet resp;
 				resp << "match/acc";
 				Server::instance()->getPlayer(receiver)->getClient()->send(resp);
@@ -75,7 +75,8 @@ void Request::handle() {
 		}
 
 		else if (content == "play") {
-			if (Server::instance()->getPlayerMatch(Server::instance()->getPlayer(sender))->getId() == receiver) {
+			if (Server::instance()->getPlayerMatch(Server::instance()->getPlayer(sender))->getId() == receiver && 
+				Server::instance()->getPlayer(sender)->getPlayersStatus() == Player::Status::InLobbyReady && Server::instance()->getPlayer(receiver)->getPlayersStatus() == Player::Status::InLobbyReady) {
 				Server::instance()->getPlayer(sender)->setPlayersStatus(Player::Status::InGame);
 				Server::instance()->getPlayer(receiver)->setPlayersStatus(Player::Status::InGame);
 
@@ -98,6 +99,15 @@ void Request::handle() {
 				resp.clear();
 				colorB.clear();
 			}
+			else {
+				sf::Packet pckt;
+				pckt << "notification/not_ok";
+				Server::instance()->getPlayer(sender)->getClient()->send(pckt);
+			}
+		}
+
+		else if (content == "status_inlobby") {
+			Server::instance()->getPlayer(sender)->setPlayersStatus(Player::Status::InLobbyReady);
 		}
 
 		else if (content == "disconnect") {
@@ -176,6 +186,12 @@ void Request::handle() {
 			cont << response.append(updatedGs.parseGameStateToString());
 			Server::instance()->getPlayer(sender)->getClient()->send(cont);
 			Server::instance()->getPlayer(receiver)->getClient()->send(cont);
+			if (updatedGs.getCurrentFlag() == "winner_white" || updatedGs.getCurrentFlag() == "winner_black") {
+				delete GetGameOf(Server::instance()->getPlayer(sender));
+				gameInstances.remove(GetGameOf(Server::instance()->getPlayer(sender)));
+				gameOf.erase(Server::instance()->getPlayer(sender));
+				gameOf.erase(Server::instance()->getPlayer(receiver));
+			}
 		}
 
 		else {

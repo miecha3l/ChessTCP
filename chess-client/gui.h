@@ -37,7 +37,6 @@ private:
 
 	tgui::VerticalLayout::Ptr multiGameLayout;
 	tgui::Button::Ptr disconnect;
-	tgui::Button::Ptr forfeit;
 	tgui::Label::Ptr currentTurn;
 	
 

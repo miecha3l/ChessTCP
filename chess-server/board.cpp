@@ -92,3 +92,8 @@ std::string Board::getWhiteTime() { return whiteTime; }
 std::string Board::getCurrentTurn() { return currentTurn; }
 void Board::setCurrentTurn(std::string t) { currentTurn = t; }
 std::string Board::getCurrentFlag() { return currentFlag; }
+
+void Board::setCurrentFlag(std::string s)
+{
+	currentFlag = s;
+}

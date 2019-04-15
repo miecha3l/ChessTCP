@@ -46,11 +46,21 @@ GameState GameInstance::updateGameInstance(int moveId) {
 		gameBoard.setCurrentTurn("black");
 		for (auto p : gameBoard.black_pieces) p->findLegalMoves(gameBoard);
 		BoardAnalisys::revalidateBlackMoves(gameBoard);
+		if (BoardAnalisys::isWhiteInStalemate(gameBoard) || BoardAnalisys::isWhiteInCheckmate(gameBoard)) {
+			gameBoard.setCurrentFlag("winner_black");
+			winner = "black";
+			gameFinished = true;
+		}
 	}
 	else if (gameBoard.getCurrentTurn() == "black") {
 		gameBoard.setCurrentTurn("white");
 		for (auto p : gameBoard.white_pieces) p->findLegalMoves(gameBoard);
 		BoardAnalisys::revalidateWhiteMoves(gameBoard);
+		if (BoardAnalisys::isWhiteInStalemate(gameBoard) || BoardAnalisys::isWhiteInCheckmate(gameBoard)) {
+			gameBoard.setCurrentFlag("winner_white");
+			winner = "white";
+			gameFinished = true;
+		}
 	}
 
 	return GameState(gameBoard);
@@ -59,6 +69,21 @@ GameState GameInstance::updateGameInstance(int moveId) {
 GameState GameInstance::getCurrentGameState()
 {
 	return GameState(gameBoard);
+}
+
+bool GameInstance::isGameFinished()
+{
+	return gameFinished;
+}
+
+void GameInstance::setGameFinished(bool s)
+{
+	gameFinished = true;
+}
+
+std::string GameInstance::getWinner()
+{
+	return winner;
 }
 
 GameInstance::~GameInstance() {

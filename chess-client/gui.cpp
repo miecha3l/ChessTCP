@@ -17,7 +17,6 @@ void GuiManager::playReq() {
 	std::string body = "req/play/";
 	if (!Client::instance()->getMatchName().empty()) {
 		Client::instance()->addReqToQueue(body.append(Client::instance()->getMatchName()).append("/").append(Client::instance()->getName()));
-		setLobbyUI(false);
 	}
 }
 
@@ -181,6 +180,9 @@ void GuiManager::dissmissMsg() {
 		setLobbyUI(true);
 		setMenuUI(false);
 		setSoloGameUI(false);
+		setMultiGameUI(false);
+		std::string req = "req/status_inlobby/server/";
+		Client::instance()->addReqToQueue(req.append(Client::instance()->getName()));
 		Client::instance()->setCurrentScreen(Client::Screen::Lobby);
 		break;
 	}
@@ -440,12 +442,10 @@ void GuiManager::init()
 	//multi game UI init
 	multiGameLayout = tgui::VerticalLayout::create();
 	disconnect = tgui::Button::create();
-	forfeit = tgui::Button::create();
 	currentTurn = tgui::Label::create();
 
 	multiGameLayout->insert(0, currentTurn, "currentTurn");
-	multiGameLayout->insert(1, forfeit, "forfeit");
-	multiGameLayout->insert(2, disconnect, "disconnect");
+	multiGameLayout->insert(1, disconnect, "disconnect");
 	multiGameLayout->setVisible(false);
 	multiGameLayout->setEnabled(false);
 	mainUI.add(multiGameLayout);
@@ -518,11 +518,10 @@ void GuiManager::init()
 	inputUserName->setSize("30%", "100%");
 	inputUserName->setTextSize(30);
 	inputUserName->getRenderer()->setFont(latoDefault);
-	inputUserName->getRenderer()->setBorders(3);
+	inputUserName->getRenderer()->setBorders(false);
 	inputUserName->getRenderer()->setBorderColor(borders);
 	inputUserName->getRenderer()->setBackgroundColor(lightBlue);
 	inputUserName->getRenderer()->setCaretColor(sf::Color::Black);
-	inputUserName->getRenderer()->setTextColor(borders);
 	
 	sendInvite->setSize("30%", "100%");
 	sendInvite->setTextSize(20);
@@ -562,8 +561,7 @@ void GuiManager::init()
 	infoBoard->setPosition("0%", "25%");
 	infoBoard->getRenderer()->setFont(latoDefault);
 	infoBoard->getRenderer()->setBackgroundColor(lightBlue);
-	infoBoard->getRenderer()->setBorders(4);
-	infoBoard->getRenderer()->setBorderColor(borders);
+	infoBoard->getRenderer()->setBorders(false);
 
 	backToMenu->setSize("20%", "40%");
 	backToMenu->setPosition("0%", "30%");
@@ -651,26 +649,11 @@ void GuiManager::init()
 	currentTurn->getRenderer()->setFont(latoBold);
 	currentTurn->getRenderer()->setTextColor(lightBlue);
 	currentTurn->setSize("95%", "7%");
-	currentTurn->setPosition("5%", "5%");
-
-	forfeit->setPosition("5%", "45%");
-	forfeit->setSize("95%", "8%");
-	forfeit->setText("Forfeit");
-	forfeit->setTextSize(22);
-	forfeit->getRenderer()->setTextColor(darkGrey);
-	forfeit->getRenderer()->setFont(latoDefault);
-	forfeit->getRenderer()->setTextColorDown(lightBlue);
-	forfeit->getRenderer()->setBackgroundColor(lightBlue);
-	forfeit->getRenderer()->setBackgroundColorHover(niceRed);
-	forfeit->getRenderer()->setBackgroundColorDown(darkerRed);
-	forfeit->getRenderer()->setBorders(false);
-	forfeit->connect("pressed", [&]() {
-		//send forfeit message to server
-	});
+	currentTurn->setPosition("5%", "45%");
 
 	disconnect->setPosition("5%", "55%");
 	disconnect->setSize("95%", "8%");
-	disconnect->setText("Disconnect");
+	disconnect->setText("Leave");
 	disconnect->setTextSize(22);
 	disconnect->getRenderer()->setTextColor(darkGrey);
 	disconnect->getRenderer()->setFont(latoDefault);

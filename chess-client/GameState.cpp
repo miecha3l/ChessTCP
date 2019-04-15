@@ -18,6 +18,10 @@ GameState::GameState(Board gameBoard) {
 	}
 }
 
+std::string GameState::getCurrentFlag() {
+	return currentFlag;
+}
+
 GameState::GameState(std::string gameStateAsString) {
 	std::string currentPart = "";
 	std::string currentSubpart = "";

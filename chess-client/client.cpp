@@ -2,16 +2,15 @@
 #include "Response.h"
 #include <Windows.h>
 #include "gui.h"
+#include <fstream>
+
 Client* Client::obj = NULL;
 extern sf::RenderWindow client;
 
 Client::Client()
 {
-	ip = "127.0.0.1";
 	port = 8888;
-	color = "";
-	matchName = "";
-	gameOverReason = "";
+	readConfigFile("assets/config.txt");
 }
 
 Client* Client::instance() {
@@ -19,11 +18,49 @@ Client* Client::instance() {
 	else return obj;
 }
 
-void Client::init() {
-	sf::Thread send(&Client::sendRequest, this);
-	sf::Thread receive(&Client::receiveResponse, this);
-	sf::Thread handle(&Client::handleResponse, this);
+void Client::readConfigFile(std::string filepath) {
+	std::ifstream configFile(filepath);
+	std::string configRaw((std::istreambuf_iterator<char>(configFile)), std::istreambuf_iterator<char>());
+	
+	std::string token, value;
+	bool readingToken = true, readingValue = false;
+	for (char character : configRaw) {
+		if (character == '=') {
+			readingToken = false;
+			readingValue = true;
+			continue;
+		}
+		else if (character == ';') {
+			if (token == "ipaddr") {
+				ip = value;
+				if (value.empty()) ip = "127.0.0.1";
+			}
+			if (token == "console") {
+				if (value == "true") console = true;
+				else console = false;
+			}
+			if (token == "sounds") {
+				if (value == "true") sounds = true;
+				else sounds = false;
+			}
+			if (token == "show_legals") {
+				if (value == "true") highlightLegals = true;
+				else highlightLegals = false;
+			}
+			readingToken = true;
+			readingValue = false;
+			token.clear();
+			value.clear();
+			continue;
+		}
+		else if (character == '\n') continue;
 
+		if (readingToken) token.push_back(character);
+		if (readingValue) value.push_back(character);
+	}
+}
+
+void Client::connect() {
 	sf::Packet initial;
 	std::cout << "connecting with server at: " << ip << std::endl;
 	serverConnection.connect(ip, port);
@@ -31,10 +68,27 @@ void Client::init() {
 	initial >> playerName;
 	std::cout << "connection accomplished" << std::endl;
 	serverConnection.setBlocking(false);
+}
 
-	send.launch();
-	receive.launch();
-	handle.launch();
+bool Client::showConsole()
+{
+	return console;
+}
+
+void Client::init() {
+	send = new sf::Thread(&Client::sendRequest, this);
+	receive = new sf::Thread (&Client::receiveResponse, this);
+	handle = new sf::Thread(&Client::handleResponse, this);
+
+	if (console == false) {
+		HWND hWnd = GetConsoleWindow();
+		ShowWindow(hWnd, SW_HIDE);
+	}
+	connect();
+
+	send->launch();
+	receive->launch();
+	handle->launch();
 }
 std::string Client::getColor() {
 	return color;
@@ -70,7 +124,6 @@ void Client::receiveResponse() {
 }
 
 void Client::handleResponse() {
-	sf::Mutex mutex;
 	while (true) {
 		if (responses.size() > 0) {
 			
@@ -80,9 +133,9 @@ void Client::handleResponse() {
 			switch (response.getType()) {
 			case Response::Type::GameInit:
 				GuiManager::instance()->setDrawLock(true);
-
 				GuiManager::instance()->setLobbyUI(false);
 				GuiManager::instance()->setMultiGameUI(true);
+				initialGs.clear();
 
 				for (int i = 0; i < 5; ++i) color.push_back(response.handle()[i]);
 				for (int i = 6; i < response.handle().size(); i++) initialGs.push_back(response.handle()[i]);
@@ -96,6 +149,12 @@ void Client::handleResponse() {
 
 			case Response::Type::GameUpdate:
 				gs = GameState(response.handle());
+				if (gs.getCurrentFlag() == "winner_white" || gs.getCurrentFlag() == "winner_black") {
+					std::string message = gs.getCurrentFlag() == "winner_white" ? "White won!" : "Black won!";
+					GuiManager::instance()->displayMessage(message);
+					inGame = false;
+					color.clear();
+				}
 				GuiManager::instance()->setCurrentTurnLabel(gs.getCurrentGameTurn());
 				break;
 
@@ -105,25 +164,21 @@ void Client::handleResponse() {
 				if (gameOverReason == "enemy_disconnected") {
 					gs = GameState("");
 					inGame = false;
-					isMatchReady = false;
 					matchName.clear();
-					isReady = false;
 					Client::instance()->setCurrentScreen(Client::Screen::Lobby);
 					GuiManager::instance()->setMultiGameUI(false);
 					GuiManager::instance()->setLobbyUI(false, true);
-					GuiManager::instance()->displayMessage("Enemy disconnected");
+					GuiManager::instance()->displayMessage("Enemy left");
 				}
 
 				else if (gameOverReason == "you_disconnected") {
 					gs = GameState("");
 					inGame = false;
-					isMatchReady = false;
 					matchName.clear();
-					isReady = false;
 					Client::instance()->setCurrentScreen(Client::Screen::Menu);
 					GuiManager::instance()->setMultiGameUI(false);
-					GuiManager::instance()->setMenuUI(false, true);
-					GuiManager::instance()->displayMessage("You disconnected");
+					GuiManager::instance()->setMenuUI(true);
+					//GuiManager::instance()->displayMessage("You left");
 				}
 
 
@@ -167,10 +222,12 @@ void Client::handleResponse() {
 				if (response.handle() == "unmatch") {
 					GuiManager::instance()->setDrawLock(true);
 					matchName = "";
-					isMatchReady = false;
 					matchReq = false;
 					GuiManager::instance()->setInfoBoardInfo();
 					GuiManager::instance()->setDrawLock(false);
+				}
+				else if (response.handle() == "not_ok") {
+
 				}
 				break;
 
@@ -219,9 +276,30 @@ SoloGame *Client::getSoloGameInstance()
 	return instance;
 }
 
+bool Client::playSounds()
+{
+	return sounds;
+}
+
+bool Client::doHighlightLegals()
+{
+	return highlightLegals;
+}
+
 void Client::initSoloGame()
 {
 	game = SoloGame(color);
+}
+
+void Client::killInstance()
+{
+	send->terminate();
+	receive->terminate();
+	handle->terminate();
+	
+	delete send;
+	delete receive;
+	delete handle;
 }
 
 bool Client::isInGame() { return inGame; }
@@ -265,26 +343,6 @@ void Client::setMatchName(std::string n)
 void Client::setRequester(std::string r)
 {
 	requester = r;
-}
-
-void Client::setIsReady(bool s)
-{
-	isReady = s;
-}
-
-bool Client::isPlayerReady()
-{
-	return isReady;
-}
-
-void Client::setIsMatchReady(bool s)
-{
-	isMatchReady = s;
-}
-
-bool Client::isPlayersMatchReady()
-{
-	return isMatchReady;
 }
 
 Client::Screen Client::getCurrentScreen()

@@ -127,6 +127,10 @@ void GameState::setBlackTimeLeft(std::string t) { blackTimeLeft = t; }
 std::string GameState::getWhiteTimeLeft() { return whiteTimeLeft; }
 void GameState::setWhiteTimeLeft(std::string t) { whiteTimeLeft = t; }
 std::string GameState::getCurrentGameTurn() { return currentGameTurn; }
+std::string GameState::getCurrentFlag()
+{
+	return currentFlag;
+}
 void GameState::setCurrentGameTurn(std::string s) { currentGameTurn = s; }
 
 GameState::~GameState()

@@ -103,6 +103,12 @@ public:
 	  */
 	std::string getCurrentFlag();
 
+
+	/**
+	  *Sets current flag parameter
+	  */
+	void setCurrentFlag(std::string);
+
 	/**
 	  *Creates entire classic set of chess figures. Used to initialize gameboard, and prepare it for game.
 	  *@param std::string color what color to create set in

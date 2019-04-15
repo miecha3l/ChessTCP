@@ -15,8 +15,15 @@ private:
 	Queue<std::string> requests;
 	Queue<sf::Packet> responses;
 
+	sf::Thread *send;
+	sf::Thread *receive;
+	sf::Thread *handle;
+
 	std::string ip;
 	int port;
+	bool console;
+	bool sounds;
+	bool highlightLegals;
 	sf::TcpSocket serverConnection;
 	GameState gs;
 	SoloGame game;
@@ -31,12 +38,12 @@ private:
 	bool onlinePlayersUpToDate = true;
 	bool matchReq = false;
 	std::string requester;
-	bool isReady = false;
-	bool isMatchReady = false;
 
 	void sendRequest();
 	void receiveResponse();
 	void handleResponse();
+
+	void readConfigFile(std::string);
 
 public:
 	static enum Screen {
@@ -61,10 +68,6 @@ public:
 	void setMatchReq(bool);
 	void setMatchName(std::string);
 	void setRequester(std::string);
-	void setIsReady(bool);
-	bool isPlayerReady();
-	void setIsMatchReady(bool);
-	bool isPlayersMatchReady();
 	Screen getCurrentScreen();
 	void setCurrentScreen(Client::Screen);
 	void setColor(std::string);
@@ -72,7 +75,12 @@ public:
 	void setGameState(Board b);
 	void resetSoloGame();
 	SoloGame *getSoloGameInstance();
+	bool playSounds();
+	bool doHighlightLegals();
 	void initSoloGame();
+	void killInstance();
+	void connect();
+	bool showConsole();
 
 private:
 	Screen currentScreen = Screen::Menu;

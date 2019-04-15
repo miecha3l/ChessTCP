@@ -107,6 +107,8 @@
       <AdditionalLibraryDirectories>C:\Users\Michal\source\repos\chess-server\TGUI-0.8\lib;C:\Users\Michal\source\repos\chess-server\SFML-2.5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sfml-window.lib;sfml-audio.lib;sfml-system.lib;sfml-network.lib;sfml-graphics.lib;tgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>NotSet</SubSystem>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

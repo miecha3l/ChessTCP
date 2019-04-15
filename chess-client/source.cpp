@@ -39,14 +39,18 @@ void windowThread() {
 	CompressedPiece pieceSelected("not_found;00;;");
 	sf::RectangleShape dimm(sf::Vector2f(1000, 760));
 	dimm.setFillColor(sf::Color(20, 20, 20, 150));
+
 	bgForWhite.loadFromFile("assets/backgroundWhite.png");
 	bgForBlack.loadFromFile("assets/backgroundBlack.png");
 	splashArt.loadFromFile("assets/splash.png");
 	lobbyBg.loadFromFile("assets/lobbybg.png");
+	moveSoundBuffer.loadFromFile("assets/move.wav");
+
+	moveSound.setBuffer(moveSoundBuffer);
 	splash.setTexture(splashArt);
 	lobby.setTexture(lobbyBg);
-	moveSoundBuffer.loadFromFile("assets/move.wav");
-	moveSound.setBuffer(moveSoundBuffer);
+
+
 	client.create(resolution, "Chess");
 	while (client.isOpen()) {
 		if (!bgLoaded && !Client::instance()->getColor().empty()) {
@@ -84,7 +88,7 @@ void windowThread() {
 				if (isPieceSelected && pieceSelected.name != "not_found") {
 					int moveId = getClickedMove(pieceSelected, Client::instance()->getColor());
 					if (moveId > 0) {
-						moveSound.play();
+						if (Client::instance()->playSounds()) moveSound.play();
 						std::string type = "game_req/";
 						Client::instance()->addReqToQueue(type.append(std::to_string(moveId)).append("/").append(Client::instance()->getName()).append("/").append(Client::instance()->getMatchName()));
 					}
@@ -105,7 +109,7 @@ void windowThread() {
 				if (isPieceSelected && pieceSelected.name != "not_found") {
 					int moveId = getClickedMove(pieceSelected, Client::instance()->getColor());
 					if (moveId > 0) {
-						moveSound.play();
+						if(Client::instance()->playSounds()) moveSound.play();
 						Client::instance()->getSoloGameInstance()->getPlayersMove(moveId);
 					}
 				}
@@ -126,12 +130,13 @@ void windowThread() {
 
 
 		if (Client::instance()->getCurrentScreen() == Client::Screen::OnlineGame) {
-			if (isPieceSelected) GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
+			if (isPieceSelected && Client::instance()->doHighlightLegals()) GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
 				&drawLegalMoves, pieceSelected, Client::instance()->getColor());
 
 
 			else if (GuiManager::instance()->isShowingMessageBox()) {
-				if (isPieceSelected)GuiManager::instance()->drawGui(background, dimm, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
+				GuiManager::instance()->setMultiGameUI(false, true);
+				if (isPieceSelected && Client::instance()->doHighlightLegals())GuiManager::instance()->drawGui(background, dimm, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
 					&drawLegalMoves, pieceSelected, Client::instance()->getColor());
 
 				else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor());
@@ -162,18 +167,21 @@ void windowThread() {
 				}
 				else GuiManager::instance()->drawGui(lobby);
 
-				if (Client::instance()->getName().empty()) GuiManager::instance()->displayMessage("You're offline, sorry");
+				if (Client::instance()->getName().empty()) {
+					GuiManager::instance()->displayMessage("You're offline, sorry");
+					GuiManager::instance()->drawGui(lobby, dimm);
+				}
 			}
 
 
 			else if (Client::instance()->getCurrentScreen() == Client::Screen::OfflineGame) {
 
-				if (isPieceSelected) GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
+				if (isPieceSelected && Client::instance()->doHighlightLegals()) GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
 																		&drawLegalMoves, pieceSelected, Client::instance()->getColor());
 
 
 				else if (GuiManager::instance()->isShowingMessageBox()) {			
-					if(isPieceSelected)GuiManager::instance()->drawGui(background, dimm, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
+					if(isPieceSelected && Client::instance()->doHighlightLegals())GuiManager::instance()->drawGui(background, dimm, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
 																			&drawLegalMoves, pieceSelected, Client::instance()->getColor());
 
 					else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor());
@@ -189,6 +197,8 @@ void windowThread() {
 		}
 		client.display();
 	}
+
+	Client::instance()->killInstance();
 }
 
 

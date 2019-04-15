@@ -25,6 +25,7 @@ public:
 	void setBlackTimeLeft(std::string);
 	std::string getBlackTimeLeft();
 	std::string getCurrentGameTurn();
+	std::string getCurrentFlag();
 	void setCurrentGameTurn(std::string);
 
 	std::string parseGameStateToString();

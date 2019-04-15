@@ -58,8 +58,8 @@ void Server::updatePlayersAndGamesList() {
 	while (true) {
 		if (playersToRemove.size() > 0) {
 			Player *p = playersToRemove.pop();
-			std::cout << "Deleting: \n";
-			std::cout << "\n" << p->getId() << "\n";
+			std::cout << "\nDeleting: \n";
+			std::cout << p->getId() << "\n";
 			deletePlayer(p);
 		}
 		Sleep(100);
@@ -128,8 +128,8 @@ void Server::handleMessages() {
 			std::string container;
 			sf::Packet msg = communicationQueue.pop();
 			msg >> container;
-			std::cout << "Request: \n";
-			std::cout << "\n" << container << "\n";
+			std::cout << "\nRequest:\n";
+			std::cout << container << "\n";
 			try {
 				Request req = Request::parse(container);
 				if (req.isValid()) req.handle();
@@ -181,8 +181,11 @@ void Server::handleInput() {
 			std::cout << "debuginfo - shows server state \n";
 			std::cout << "==================================================================\n\n";
 		}
+		else if (input == "exit") {
+			exit(0);
+		}
 		else {
-			std::cout << "Wrong command.\n\n";
+			std::cout << "Wrong command. Type \"?\" to see help.\n\n";
 		}
 	}
 }
@@ -287,6 +290,7 @@ int Server::playersCount() {
 int Server::messagesCount() {
 	return communicationQueue.size();
 }
+
 
 Player* Server::getPlayer(int id) {
 	auto outcome = playerOf.find(id);

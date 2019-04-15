@@ -12,6 +12,8 @@ private:
 	Player *white;
 	Player *black;
 	Board gameBoard;
+	bool gameFinished;
+	std::string winner;
 
 public:
 	GameInstance();
@@ -26,4 +28,7 @@ public:
 	Board getBoard();
 	GameState updateGameInstance(int);
 	GameState getCurrentGameState();
+	bool isGameFinished();
+	void setGameFinished(bool);
+	std::string getWinner();
 };

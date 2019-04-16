@@ -1,5 +1,6 @@
 #include "Server.h"
-#include "Windows.h"
+#include <thread>
+#include <chrono>
 #include "GameInstance.h"
 #include <list>
 #include "Request.h"
@@ -46,7 +47,7 @@ void Server::acceptClients() {
 		welcomemsg << std::to_string(players.back()->getId());
 		players.back()->getClient()->send(welcomemsg);
 		client = new sf::TcpSocket();
-		Sleep(200);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 }
 
@@ -62,7 +63,7 @@ void Server::updatePlayersAndGamesList() {
 			std::cout << p->getId() << "\n";
 			deletePlayer(p);
 		}
-		Sleep(100);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));;
 	}
 }
 
@@ -138,7 +139,7 @@ void Server::handleMessages() {
 			catch (int &e) {}
 			catch(...){}
 		}
-		Sleep(200);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 }
 

@@ -170,10 +170,18 @@ void GuiManager::dissmissMsg() {
 		break;
 
 	case Client::Screen::OfflineGame:
-		setSoloGameUI(true);
-		setMultiGameUI(false);
-		setMenuUI(false);
-		setLobbyUI(false);
+		if (Client::instance()->getSoloGameInstance()->getGameOver() == "White won!" || Client::instance()->getSoloGameInstance()->getGameOver() == "Black won!") {
+			setSoloGameUI(false);
+			setMultiGameUI(false);
+			setMenuUI(true);
+			setLobbyUI(false);
+		}
+		else {
+			setSoloGameUI(true);
+			setMultiGameUI(false);
+			setMenuUI(false);
+			setLobbyUI(false);
+		}
 		break;
 
 	case Client::Screen::OnlineGame:
@@ -522,6 +530,7 @@ void GuiManager::init()
 	inputUserName->getRenderer()->setBorderColor(borders);
 	inputUserName->getRenderer()->setBackgroundColor(lightBlue);
 	inputUserName->getRenderer()->setCaretColor(sf::Color::Black);
+	inputUserName->getRenderer()->setTextColor(darkGrey);
 	
 	sendInvite->setSize("30%", "100%");
 	sendInvite->setTextSize(20);
@@ -680,6 +689,7 @@ void GuiManager::init()
 	messageInfo->setPosition("25%", "10%");
 	messageInfo->setTextSize(20);
 	messageInfo->getRenderer()->setFont(latoDefault);
+	messageInfo->getRenderer()->setTextColor(darkGrey);
 
 	dismiss->setPosition("35%", "60%");
 	dismiss->setSize("30%", "30%");

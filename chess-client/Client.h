@@ -31,10 +31,8 @@ private:
 	std::string matchName;
 	std::string color;
 	std::string gameOverReason;
-	std::string initialGs;
 	std::list<std::string> onlinePlayers;
 	bool inGame = false;
-	bool gsUpToDate = false;
 	bool onlinePlayersUpToDate = true;
 	bool matchReq = false;
 	std::string requester;
@@ -46,7 +44,7 @@ private:
 	void readConfigFile(std::string);
 
 public:
-	static enum Screen {
+	enum Screen {
 		Menu,
 		Lobby,
 		OnlineGame,
@@ -73,6 +71,14 @@ public:
 	void setColor(std::string);
 	GameState getGameState();
 	void setGameState(Board b);
+	void setGameState(GameState);
+	void setInGame(bool);
+	void setServerConnection(bool);
+	void setGameOverReason(std::string);
+	void setOnlinePlayers(std::list<std::string>);
+	void addOnlinePlayer(std::string);
+	std::string getGameOverReason();
+	void setOnlinePlayersU2D(bool);
 	void resetSoloGame();
 	SoloGame *getSoloGameInstance();
 	bool playSounds();

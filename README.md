@@ -1,5 +1,8 @@
-# ChessTCP
-Client-Server chess game via SFML::Network TCP socket connection
+# VitaChess
+VitaChess is simple chess platform that includes server app and its own
+chess client app. Platform is based on TCP connection handled by SFML Network module. 
+Client and server have their own custom communication protocol. Vita chess enable playing
+online vs friends as well as solo offline.
 
 ## Project introduction
 This is my client-server chess game based on my own (kind off) chess engine. 

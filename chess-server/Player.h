@@ -12,7 +12,7 @@ private:
 	std::string login;
 
 public:
-	static enum Status {
+	enum Status {
 		Idle,
 		InLobbyNotReady,
 		InLobbyReady,

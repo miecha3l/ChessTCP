@@ -135,8 +135,6 @@ void Server::handleMessages() {
 				Request req = Request::parse(container);
 				if (req.isValid()) req.handle();
 			}
-			catch (std::invalid_argument &e) {}
-			catch (int &e) {}
 			catch(...){}
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));

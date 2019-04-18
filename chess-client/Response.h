@@ -4,7 +4,7 @@
 class Response
 {
 public:
-	static enum Type {
+	enum Type {
 		Plist,
 		GameInit,
 		Match,
@@ -14,7 +14,7 @@ public:
 		Other
 	};
 	Response(Type, std::string);
-	std::string handle();
+	void handle();
 	static Response parse(std::string);
 	Type getType();
 	bool isValid();

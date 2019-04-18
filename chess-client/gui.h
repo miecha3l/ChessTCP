@@ -4,14 +4,14 @@
 #include <iostream>
 #include "GameState.h"
 
-extern sf::RenderWindow client;
+extern sf::RenderWindow clientWindow;
 
 class GuiManager {
 private:
 	GuiManager();
 	static GuiManager *gm;
 
-	tgui::Gui mainUI{ client };
+	tgui::Gui mainUI{ clientWindow };
 	tgui::VerticalLayout::Ptr mainUILayout;
 	tgui::Button::Ptr playSolo;
 	tgui::Button::Ptr playWithFriend;

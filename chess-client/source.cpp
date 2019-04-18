@@ -12,7 +12,7 @@
 #include <Windows.h>
 
 sf::VideoMode resolution(1000, 760);
-sf::RenderWindow client;
+sf::RenderWindow clientWindow;
 sf::Texture bgForWhite;
 sf::Texture bgForBlack;
 sf::Texture splashArt;
@@ -51,8 +51,8 @@ void windowThread() {
 	lobby.setTexture(lobbyBg);
 
 
-	client.create(resolution, "Chess");
-	while (client.isOpen()) {
+	clientWindow.create(resolution, "Chess");
+	while (clientWindow.isOpen()) {
 		if (!bgLoaded && !Client::instance()->getColor().empty()) {
 			if (Client::instance()->getColor() == "white") background.setTexture(bgForWhite);
 			else if (Client::instance()->getColor() == "black") background.setTexture(bgForBlack);
@@ -80,8 +80,8 @@ void windowThread() {
 
 
 		sf::Event evnt;
-		while (client.pollEvent(evnt)) {
-			if (evnt.type == sf::Event::Closed) client.close();
+		while (clientWindow.pollEvent(evnt)) {
+			if (evnt.type == sf::Event::Closed) clientWindow.close();
 
 			//online game events
 			if (evnt.type == sf::Event::MouseButtonPressed && Client::instance()->getGameState().getCurrentGameTurn() == Client::instance()->getColor() && Client::instance()->isInGame()) {
@@ -94,7 +94,7 @@ void windowThread() {
 					}
 				}
 
-				CompressedPiece piece = getPieceClicked(client, Client::instance()->getGameState(), Client::instance()->getColor());
+				CompressedPiece piece = getPieceClicked(clientWindow, Client::instance()->getGameState(), Client::instance()->getColor());
 				pieceSelected = piece;
 				if (piece.name != "not_found") {
 					isPieceSelected = true;
@@ -114,7 +114,7 @@ void windowThread() {
 					}
 				}
 				
-				CompressedPiece piece = getPieceClicked(client, Client::instance()->getGameState(), Client::instance()->getColor());
+				CompressedPiece piece = getPieceClicked(clientWindow, Client::instance()->getGameState(), Client::instance()->getColor());
 				pieceSelected = piece;
 				if (piece.name != "not_found") {
 					isPieceSelected = true;
@@ -195,7 +195,7 @@ void windowThread() {
 				}
 			}
 		}
-		client.display();
+		clientWindow.display();
 	}
 
 	Client::instance()->killInstance();
@@ -235,7 +235,7 @@ void drawGameState(GameState gs, std::string color) {
 		piece.setTexture(texture);
 		piece.setPosition(screenPos);
 
-		client.draw(piece);
+		clientWindow.draw(piece);
 	}
 
 	for (auto p : gs.getBlackPieces()) {
@@ -259,7 +259,7 @@ void drawGameState(GameState gs, std::string color) {
 		piece.setTexture(texture);
 		piece.setPosition(screenPos);
 
-		client.draw(piece);
+		clientWindow.draw(piece);
 	}
 }
 
@@ -304,12 +304,12 @@ void drawLegalMoves(CompressedPiece p, std::string color) {
 		mark.setTexture(markText);
 		mark.setPosition(screenPos);
 
-		client.draw(mark);
+		clientWindow.draw(mark);
 	}
 }
 
 int getClickedMove(CompressedPiece &p, std::string color) {
-	sf::Vector2i posClicked = sf::Mouse::getPosition(client);
+	sf::Vector2i posClicked = sf::Mouse::getPosition(clientWindow);
 	for (auto m : p.legalMoves) {
 		
 		

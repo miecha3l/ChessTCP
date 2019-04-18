@@ -6,7 +6,7 @@
 #include <fstream>
 
 Client* Client::obj = NULL;
-extern sf::RenderWindow client;
+extern sf::RenderWindow clientWindow;
 
 Client::Client()
 {

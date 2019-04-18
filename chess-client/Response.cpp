@@ -7,7 +7,7 @@ Response::Response(Type t, std::string cont)
 {
 }
 
-std::string Response::handle() {
+void Response::handle() {
 	std::string tempcolor, tempgs;
 	switch (this->type) {
 	case Response::Type::GameInit:

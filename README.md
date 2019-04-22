@@ -85,31 +85,20 @@ that this is the case of my weak processor.
 (Download link soon)
 
 #### Linux
-Tested only on linux mint. <br>
+Tested only on linux mint. Only server available. <br>
 
 Clone repo:
 ```bash
 git clone https://github.com/miecha3l/VitaChess/
 cd VitaChess && mkdir build
 ```
+
 Install sfml:
 ```bash
 sudo apt-get install libsfml-dev
 ```
 
-Install tgui:
-```bash
-sudo add-apt-repository ppa:texus/tgui-0.8
-sudo apt-get update
-sudo apt-get install libtgui-dev
-```
-
 Build server:
 ```bash
 g++ -o build/server chess-server/*.cpp -lsfml-network -lsfml-system -lsfml-window -lsfml-audio -lsfml-graphics
-```
-
-Build client:
-```bash
-g++ -o build/server chess-client/*.cpp -lsfml-network -lsfml-system -lsfml-window -lsfml-audio -lsfml-graphics -ltgui
 ```

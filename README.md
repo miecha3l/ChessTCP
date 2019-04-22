@@ -102,3 +102,8 @@ Build server:
 ```bash
 g++ -o build/server chess-server/*.cpp -lsfml-network -lsfml-system -lsfml-window -lsfml-audio -lsfml-graphics
 ```
+
+Run:
+```bash
+cd build && ./server
+```

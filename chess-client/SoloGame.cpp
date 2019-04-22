@@ -101,3 +101,9 @@ std::string SoloGame::getGameOver()
 {
 	return gameOver;
 }
+
+void SoloGame::reset() {
+	gameBoard = Board();
+	botsColor = "";
+	initialized = false;
+}

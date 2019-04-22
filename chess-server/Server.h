@@ -15,7 +15,7 @@ private:
 	int port;
 	void handleMessages();
 	void acceptClients();
-	void updatePlayersAndGamesList();
+	void updatePlayersList();
 	void handleInput();
 	void printASCII();
 	void printPlayerList();

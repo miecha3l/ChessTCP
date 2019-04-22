@@ -62,6 +62,7 @@ void Client::readConfigFile(std::string filepath) {
 }
 
 void Client::connect() {
+	serverConnection.setBlocking(true);
 	sf::Packet initial;
 	serverConnection.connect(ip, port);
 	serverConnection.receive(initial);
@@ -102,7 +103,6 @@ void Client::sendRequest() {
 			std::string raw = requests.pop();
 			req << raw;
 			serverConnection.send(req);
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
@@ -111,7 +111,13 @@ void Client::sendRequest() {
 void Client::receiveResponse() {
 	while (true) {
 		sf::Packet response;
-		serverConnection.receive(response);
+		if (serverConnection.receive(response) == sf::Socket::Disconnected && !playerName.empty()) {
+			playerName = "";
+			matchName = "";
+			if (Client::instance()->getCurrentScreen() != Client::Screen::OfflineGame) {
+				GuiManager::instance()->displayMessage("Server went offline");
+			}
+		}
 		if (response.getDataSize() > 0) responses.push(response);
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
@@ -177,6 +183,11 @@ void Client::addOnlinePlayer(std::string s)
 std::string Client::getGameOverReason()
 {
 	return gameOverReason;
+}
+
+void Client::setName(std::string s)
+{
+	playerName = s;
 }
 
 void Client::setOnlinePlayersU2D(bool s)

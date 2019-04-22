@@ -11,6 +11,7 @@ private:
 	GuiManager();
 	static GuiManager *gm;
 
+	sf::Mutex guiMutex;
 	tgui::Gui mainUI{ clientWindow };
 	tgui::VerticalLayout::Ptr mainUILayout;
 	tgui::Button::Ptr playSolo;

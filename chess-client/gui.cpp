@@ -133,6 +133,8 @@ void GuiManager::setCurrentTurnLabel(std::string s)
 
 void GuiManager::setDrawLock(bool s)
 {
+	if (s) guiMutex.lock();
+	else guiMutex.unlock();
 	lockGuiDraw = s;
 }
 
@@ -170,7 +172,8 @@ void GuiManager::dissmissMsg() {
 		break;
 
 	case Client::Screen::OfflineGame:
-		if (Client::instance()->getSoloGameInstance()->getGameOver() == "White won!" || Client::instance()->getSoloGameInstance()->getGameOver() == "Black won!") {
+		if (!Client::instance()->getSoloGameInstance()->getGameOver().empty()) {
+			Client::instance()->setCurrentScreen(Client::Screen::Menu);
 			setSoloGameUI(false);
 			setMultiGameUI(false);
 			setMenuUI(true);
@@ -327,22 +330,22 @@ void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm)
 	}
 }
 
-void GuiManager::drawGui(sf::Sprite bg, void(*f)(GameState, std::string color), GameState p1, std::string p3)
+void GuiManager::drawGui(sf::Sprite bg, void(*drawGs)(GameState, std::string color), GameState p1, std::string p3)
 {
 	if (!lockGuiDraw) {
 		clientWindow.clear();
 		clientWindow.draw(bg);
-		(*f)(p1, p3);
+		(*drawGs)(p1, p3);
 		mainUI.draw();
 	}
 }
 
-void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*f)(GameState, std::string color), GameState p1, std::string p3)
+void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*drawGs)(GameState, std::string color), GameState p1, std::string p3)
 {
 	if (!lockGuiDraw) {
 		clientWindow.clear();
 		clientWindow.draw(bg);
-		(*f)(p1, p3);
+		(*drawGs)(p1, p3);
 		clientWindow.draw(dimm);
 		mainUI.draw();
 	}

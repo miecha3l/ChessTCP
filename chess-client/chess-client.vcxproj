@@ -143,6 +143,7 @@
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="Response.cpp" />
+    <ClCompile Include="Core.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bishop.h" />
@@ -161,6 +162,7 @@
     <ClInclude Include="Response.h" />
     <ClInclude Include="rook.h" />
     <ClInclude Include="SoloGame.h" />
+    <ClInclude Include="Core.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -23,5 +23,6 @@ public:
 	bool isInitialized();
 	std::string getCurrentTurn();
 	std::string getGameOver();
+	void reset();
 };
 

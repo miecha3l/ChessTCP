@@ -78,6 +78,7 @@ public:
 	void setOnlinePlayers(std::list<std::string>);
 	void addOnlinePlayer(std::string);
 	std::string getGameOverReason();
+	void setName(std::string s);
 	void setOnlinePlayersU2D(bool);
 	void resetSoloGame();
 	SoloGame *getSoloGameInstance();

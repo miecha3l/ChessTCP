@@ -7,7 +7,7 @@
 Server* Server::obj = NULL;
 std::list<GameInstance*> gameInstances;
 std::map<Player*, GameInstance*> gameOf;
-extern Queue<sf::Packet> communicationQueue;
+extern Queue<sf::Packet> inQueue;
 extern Queue<Player*> playersToRemove;
 
 GameInstance* getGameOf(Player*p) {
@@ -43,9 +43,9 @@ void Server::acceptClients() {
 		threadOf[players.back()] = playerThreads.back();
 		playerOf[players.back()->getId()] = players.back();
 
-		sf::Packet welcomemsg;
-		welcomemsg << std::to_string(players.back()->getId());
-		players.back()->getClient()->send(welcomemsg);
+		sf::Packet usrid;
+		usrid << std::to_string(players.back()->getId());
+		players.back()->getClient()->send(usrid);
 		client = new sf::TcpSocket();
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
@@ -55,7 +55,7 @@ void Server::removeMatch(int id) {
 	matchOf.erase(getPlayer(id));
 }
 
-void Server::updatePlayersAndGamesList() {
+void Server::updatePlayersList() {
 	while (true) {
 		if (playersToRemove.size() > 0) {
 			Player *p = playersToRemove.pop();
@@ -125,9 +125,9 @@ void Server::deletePlayer(Player*p) {
 
 void Server::handleMessages() {
 	while (true) {
-		if (communicationQueue.size() > 0){
+		if (inQueue.size() > 0){
 			std::string container;
-			sf::Packet msg = communicationQueue.pop();
+			sf::Packet msg = inQueue.pop();
 			msg >> container;
 			std::cout << "\nRequest:\n";
 			std::cout << container << "\n";
@@ -141,6 +141,7 @@ void Server::handleMessages() {
 	}
 }
 
+//handle cli commands
 void Server::handleInput() {
 	while (true) {
 		std::string input;
@@ -207,7 +208,7 @@ void Server::printASCII() {
 
 void Server::init() {
 	sf::Thread accept(&Server::acceptClients, this);
-	sf::Thread update(&Server::updatePlayersAndGamesList, this);
+	sf::Thread update(&Server::updatePlayersList, this);
 	sf::Thread handleMsg(&Server::handleMessages, this);
 	sf::Thread cli(&Server::handleInput, this);
 
@@ -286,7 +287,7 @@ int Server::playersCount() {
 }
 
 int Server::messagesCount() {
-	return communicationQueue.size();
+	return inQueue.size();
 }
 
 

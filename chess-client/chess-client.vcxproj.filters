@@ -72,6 +72,9 @@
     <ClCompile Include="rook.cpp">
       <Filter>Source Files\engine_source</Filter>
     </ClCompile>
+    <ClCompile Include="Core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CompressedPiece.h">
@@ -121,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="rook.h">
       <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -100,6 +100,11 @@ void Response::handle() {
 			GuiManager::instance()->setInfoBoardInfo();
 			GuiManager::instance()->setDrawLock(false);
 		}
+		else if (this->content == "server_down") {
+			Client::instance()->setName("");
+			Client::instance()->setMatchName("");
+			GuiManager::instance()->displayMessage("Server went offline");
+		}
 		break;
 
 	case Response::Type::Plist:

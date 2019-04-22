@@ -1,7 +1,7 @@
 #include "Player.h"
 #include "Server.h"
 
-Queue<sf::Packet> communicationQueue;
+Queue<sf::Packet> inQueue;
 Queue<Player*> playersToRemove;
 
 Player::Player(sf::TcpSocket *socket, std::string login)
@@ -22,7 +22,7 @@ void Player::communicate() {
 		sf::Packet packet;
 		std::string container;
 		if (client->receive(packet) == sf::Socket::Status::Done) {
-			communicationQueue.push(packet);
+			inQueue.push(packet);
 		}
 		else if (client->receive(packet) == sf::Socket::Status::Disconnected) {
 			status = Status::Disconnected;
@@ -50,6 +50,5 @@ void Player::setPlayersStatus(Status s) {
 
 Player::~Player()
 {
-	std::cout << "Destroying player" << std::endl;
 	delete client;
 }

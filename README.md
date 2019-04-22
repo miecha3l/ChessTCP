@@ -6,8 +6,11 @@ online vs friends as well as solo offline.
 
 ## Project introduction
 This is my client-server chess game based on my own (kind off) chess engine. 
-Communication model is based on TCP/IP socket connection implemented via SFML Network module.
+Communication model is based on TCP socket connection implemented via SFML Network module.
 This project is created as submission for my school programming contest "SCI++".  
+
+
+
 
 # Progress as for 15.04.2019
 ## Server
@@ -27,11 +30,11 @@ Such entry can be erased on clients request.
 
 #### *Initialize and handle multiple games
 Server can spawn and manage multiple game instances as well as exit (destroy them) after player quits.
-For now only way to destroy game instance is for one player to close their client but "disconnect" button is on its way.
+Player can quit via in game "leave" button or by closing application.
 
-### Struggles:
-#### *Handling game signals (such as check/checkmate/stalemate)
-Its more of a client side struggle but server also needs to terminate game instance when for eg. checkmate occures.
+
+
+
 
 
 ## Client
@@ -59,19 +62,54 @@ read violation exception, sometimes just crashed without any particular reason. 
 that this is the case of my weak processor.
 
 
+
+
 ## Other information
 ### Stuff used
 [SFML](https://www.sfml-dev.org/download.php) version 2.5.1 and [TGUI](https://tgui.eu/download/) version 0.8
 
 ### To do:
 -Bug fixing <br>
--Forfeit option <br>
+-Chess bot algorithm <br>
 
-### What i learned
+### I have learned:
 -how TCP/IP works in practice <br>
 -how to design basic client-server communication <br>
 -working with multiple threads <br>
+-how NOT TO design this kind of solution <br>
 
 
 ### Installation
-For now you have to clone this repo and compile it yourself.
+
+#### Windows 
+(Download link soon)
+
+#### Linux
+Tested only on linux mint. <br>
+
+Clone repo:
+```bash
+git clone https://github.com/miecha3l/VitaChess/
+cd VitaChess && mkdir build
+```
+Install sfml:
+```bash
+sudo apt-get install libsfml-dev
+```
+
+Install tgui:
+```bash
+sudo add-apt-repository ppa:texus/tgui-0.8
+sudo apt-get update
+sudo apt-get install libtgui-dev
+```
+
+Build server:
+```bash
+g++ -o build/server chess-server/*.cpp -lsfml-network -lsfml-system -lsfml-window -lsfml-audio -lsfml-graphics
+```
+
+Build client:
+```bash
+g++ -o build/server chess-client/*.cpp -lsfml-network -lsfml-system -lsfml-window -lsfml-audio -lsfml-graphics -ltgui
+```

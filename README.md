@@ -12,7 +12,7 @@ This project is created as submission for my school programming contest "SCI++".
 
 
 
-# Progress as for 15.04.2019
+# Progress as for 22.04.2019
 ## Server
 Server app is now almost fully functional and stable. Only thing left to do is add more cases to request handling class.
 

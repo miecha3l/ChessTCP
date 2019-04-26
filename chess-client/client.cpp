@@ -211,9 +211,19 @@ bool Client::playSounds()
 	return sounds;
 }
 
+void Client::setSounds(bool s)
+{
+	sounds = s;
+}
+
 bool Client::doHighlightLegals()
 {
 	return highlightLegals;
+}
+
+void Client::setHighlights(bool s)
+{
+	highlightLegals = s;
 }
 
 void Client::initSoloGame()

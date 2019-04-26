@@ -402,10 +402,14 @@ void GuiManager::init()
 	mainUILayout = tgui::VerticalLayout::create();
 	playSolo = tgui::Button::create();
 	playWithFriend = tgui::Button::create();
+	soundSwitch = tgui::CheckBox::create();
+	highlightSwitch = tgui::CheckBox::create();
 
 
 	mainUILayout->insert(0, playWithFriend, "Play with friend");
 	mainUILayout->insert(1, playSolo, "Play solo");
+	mainUILayout->insert(2, soundSwitch, "sound switch");
+	mainUILayout->insert(3, highlightSwitch, "highlight switch");
 	mainUI.add(mainUILayout);
 
 	//lobby UI init
@@ -475,12 +479,11 @@ void GuiManager::init()
 	messageBoxBody->setVisible(false);
 
 	//main UI setup
-	mainUILayout->setSize(300, 160);
+	mainUILayout->setSize(300, 260);
 	mainUILayout->setPosition( 350, 500 );
-	mainUILayout->getRenderer()->setSpaceBetweenWidgets(30);
 
-
-	playSolo->setSize( "100%", "40%" );
+	playSolo->setSize( "100%", "30%" );
+	playSolo->setPosition("0%", "0%");
 	playSolo->setText("PLAY SOLO");
 	playSolo->setTextSize(22);
 	playSolo->getRenderer()->setTextColor(darkGrey);
@@ -497,7 +500,8 @@ void GuiManager::init()
 		setSoloGameUI(true);
 	});
 
-	playWithFriend->setSize( "100%", "40%" );
+	playWithFriend->setSize( "100%", "30%" );
+	playWithFriend->setPosition("0%", "36%");
 	playWithFriend->setText("PLAY WITH FRIEND");
 	playWithFriend->setTextSize(22);
 	playWithFriend->getRenderer()->setTextColor(darkGrey);
@@ -516,6 +520,37 @@ void GuiManager::init()
 		setInfoBoardInfo();
 	});
 
+	soundSwitch->setSize("8%", "9%");
+	soundSwitch->setPosition("20%", "73%");
+	soundSwitch->setText(" sound");
+	soundSwitch->setChecked(Client::instance()->playSounds());
+	soundSwitch->setTextSize(18);
+	soundSwitch->getRenderer()->setFont(latoDefault);
+	soundSwitch->getRenderer()->setTextColor(lightBlue);
+	soundSwitch->getRenderer()->setBackgroundColor(lightBlue);
+	soundSwitch->getRenderer()->setCheckColor(darkGrey);
+	soundSwitch->connect("Checked", [&]() {
+		Client::instance()->setSounds(true);
+	});
+	soundSwitch->connect("Unchecked", [&]() {
+		Client::instance()->setSounds(false);
+	});
+
+	highlightSwitch->setSize("8%", "9%");
+	highlightSwitch->setPosition("20%", "85%");
+	highlightSwitch->setText(" show legal moves");
+	highlightSwitch->setChecked(Client::instance()->doHighlightLegals());
+	highlightSwitch->setTextSize(18);
+	highlightSwitch->getRenderer()->setFont(latoDefault);
+	highlightSwitch->getRenderer()->setTextColor(lightBlue);
+	highlightSwitch->getRenderer()->setBackgroundColor(lightBlue);
+	highlightSwitch->getRenderer()->setCheckColor(darkGrey);
+	highlightSwitch->connect("Checked", [&]() {
+		Client::instance()->setHighlights(true);
+	});
+	highlightSwitch->connect("Unchecked", [&]() {
+		Client::instance()->setHighlights(false);
+	});
 
 
 

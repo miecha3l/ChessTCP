@@ -83,7 +83,9 @@ public:
 	void resetSoloGame();
 	SoloGame *getSoloGameInstance();
 	bool playSounds();
+	void setSounds(bool);
 	bool doHighlightLegals();
+	void setHighlights(bool);
 	void initSoloGame();
 	void killInstance();
 	void connect();

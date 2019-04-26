@@ -148,8 +148,7 @@ void windowThread() {
 	splash.setTexture(splashArt);
 	lobby.setTexture(lobbyBg);
 
-
-	clientWindow.create(resolution, "Chess");
+	clientWindow.create(resolution, "VitaChess", sf::Style::Close | sf::Style::Titlebar);
 	while (clientWindow.isOpen()) {
 		if (!bgLoaded && !Client::instance()->getColor().empty()) {
 			if (Client::instance()->getColor() == "white") background.setTexture(bgForWhite);

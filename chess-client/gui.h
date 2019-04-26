@@ -16,6 +16,8 @@ private:
 	tgui::VerticalLayout::Ptr mainUILayout;
 	tgui::Button::Ptr playSolo;
 	tgui::Button::Ptr playWithFriend;
+	tgui::CheckBox::Ptr soundSwitch;
+	tgui::CheckBox::Ptr highlightSwitch;
 
 	tgui::VerticalLayout::Ptr lobbyUILayout;
 	tgui::HorizontalLayout::Ptr topRow;

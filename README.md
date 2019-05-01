@@ -59,14 +59,13 @@ there is also button to kick matched player.
 [SFML](https://www.sfml-dev.org/download.php) version 2.5.1 and [TGUI](https://tgui.eu/download/) version 0.8
 
 ### To do:
--Bug fixing <br>
--Chess bot algorithm <br>
+Nothing, project closed.
 
 ### I have learned:
 -how TCP/IP works in practice <br>
 -how to design basic client-server communication <br>
 -working with multiple threads <br>
--how NOT TO design this kind of solution <br>
+
 
 
 ### Installation

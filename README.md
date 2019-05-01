@@ -7,14 +7,12 @@ online vs friends as well as solo offline.
 ## Project introduction
 This is my client-server chess game based on my own (kind off) chess engine. 
 Communication model is based on TCP socket connection implemented via SFML Network module.
-This project is created as submission for my school programming contest "SCI++".  
+This project is created as submission for my school programming contest "SCI++". 
+As for 1.05.2019 project is closed and i don't plan on further development. 
 
 
 
-
-# Progress as for 22.04.2019
 ## Server
-Server app is now almost fully functional and stable. Only thing left to do is add more cases to request handling class.
 
 ### Features:
 #### *Command line interface via which admin can check server details
@@ -38,8 +36,6 @@ Player can quit via in game "leave" button or by closing application.
 
 
 ## Client
-Client app is at the moment mostly functional. Refreshed and implemented probably final UI look. Got rid of most of the bugs.
-Client is now close to stable 1.0 version (needs far more testing).
 
 ### Features:
 #### *Sending and accepting match invites via players ID
@@ -55,12 +51,6 @@ Client provides in game disconnect button (as well as forfeit button but funcion
 there is also button to kick matched player.
 
 
-### Struggles:
-##### *Unexpected random crashes
-While tested on my machine (old intel pentium laptop, 2 clients and server running at once) client sometimes unexpectedly crashed. Sometimes threw
-read violation exception, sometimes just crashed without any particular reason. After fixing read violation and some testing on better machine I assume
-that this is the case of my weak processor.
-
 
 
 
@@ -69,14 +59,13 @@ that this is the case of my weak processor.
 [SFML](https://www.sfml-dev.org/download.php) version 2.5.1 and [TGUI](https://tgui.eu/download/) version 0.8
 
 ### To do:
--Bug fixing <br>
--Chess bot algorithm <br>
+Nothing, project closed.
 
 ### I have learned:
 -how TCP/IP works in practice <br>
 -how to design basic client-server communication <br>
 -working with multiple threads <br>
--how NOT TO design this kind of solution <br>
+
 
 
 ### Installation

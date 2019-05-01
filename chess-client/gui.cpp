@@ -326,51 +326,66 @@ void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm)
 		clientWindow.clear();
 		clientWindow.draw(bg);
 		clientWindow.draw(dimm);
-		mainUI.draw();
+		try {
+			mainUI.draw();
+		}
+		catch (...) {}
 	}
 }
 
-void GuiManager::drawGui(sf::Sprite bg, void(*drawGs)(GameState, std::string color), GameState p1, std::string p3)
+void GuiManager::drawGui(sf::Sprite bg, void(*drawGs)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3)
 {
 	if (!lockGuiDraw) {
 		clientWindow.clear();
 		clientWindow.draw(bg);
-		(*drawGs)(p1, p3);
-		mainUI.draw();
+		(*drawGs)(p1, p3, CompressedPiece("not_found;99;;"));
+		try {
+			mainUI.draw();
+		}
+		catch (...) {}
 	}
 }
 
-void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*drawGs)(GameState, std::string color), GameState p1, std::string p3)
+void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*drawGs)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3)
 {
 	if (!lockGuiDraw) {
 		clientWindow.clear();
 		clientWindow.draw(bg);
-		(*drawGs)(p1, p3);
+		(*drawGs)(p1, p3, CompressedPiece("not_found;99;;"));
 		clientWindow.draw(dimm);
-		mainUI.draw();
+		try {
+			mainUI.draw();
+		}
+		catch (...) {}
 	}
 }
 
-void GuiManager::drawGui(sf::Sprite bg, void(*drawGs)(GameState, std::string color), GameState p1, std::string p3, void(*drawLegals)(CompressedPiece, std::string), CompressedPiece p4, std::string p5)
+void GuiManager::drawGui(sf::Sprite bg, void(*drawGs)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3, void(*drawLegals)(CompressedPiece, std::string), CompressedPiece p4, std::string p5)
 {
 	if (!lockGuiDraw) {
 		clientWindow.clear();
 		clientWindow.draw(bg);
-		(*drawGs)(p1, p3);
+		(*drawGs)(p1, p3, p4);
 		(*drawLegals)(p4, p5);
-		mainUI.draw();
+		try {
+			mainUI.draw();
+		} 
+		catch(...){}
 	}
 }
 
-void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*drawGs)(GameState, std::string color), GameState p1, std::string p3, void(*drawLegals)(CompressedPiece, std::string), CompressedPiece p4, std::string p5)
+void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*drawGs)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3, void(*drawLegals)(CompressedPiece, std::string), CompressedPiece p4, std::string p5)
 {
 	if (!lockGuiDraw) {
 		clientWindow.clear();
 		clientWindow.draw(bg);
-		(*drawGs)(p1, p3);
+		(*drawGs)(p1, p3, p4);
 		(*drawLegals)(p4, p5);
 		clientWindow.draw(dimm);
-		mainUI.draw();
+		try {
+			mainUI.draw();
+		}
+		catch (...) {}
 	}
 }
 

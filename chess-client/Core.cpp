@@ -12,17 +12,24 @@ std::string response;
 sf::SoundBuffer moveSoundBuffer;
 sf::Sound moveSound;
 
-void drawGameState(GameState gs, std::string color) {
+void drawGameState(GameState gs, std::string color, CompressedPiece selected) {
 
 	std::string texturePathRoot = "assets/";
 	for (auto p : gs.getWhitePieces()) {
 		sf::Vector2f screenPos;
-		if (color == "white") {
-			screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && p.boardPos.x == selected.boardPos.x && p.boardPos.y == selected.boardPos.y) {
+			screenPos.x = sf::Mouse::getPosition(clientWindow).x - 35;
+			screenPos.y = sf::Mouse::getPosition(clientWindow).y - 35;
 		}
 		else {
-			screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, ((7 - p.boardPos.y) * tileDims) + offset);
+			if (color == "white") {
+				screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+			}
+			else {
+				screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, ((7 - p.boardPos.y) * tileDims) + offset);
+			}
 		}
+		
 		sf::Texture texture;
 		sf::Sprite piece;
 
@@ -40,13 +47,21 @@ void drawGameState(GameState gs, std::string color) {
 
 	for (auto p : gs.getBlackPieces()) {
 		sf::Vector2f screenPos;
-		if (color == "white") {
-			screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+		
+
+		if(sf::Mouse::isButtonPressed(sf::Mouse::Left) && p.boardPos.x == selected.boardPos.x && p.boardPos.y == selected.boardPos.y){
+			screenPos.x = sf::Mouse::getPosition(clientWindow).x - 35;
+			screenPos.y = sf::Mouse::getPosition(clientWindow).y - 35;
 		}
 		else {
-			screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, ((7 - p.boardPos.y) * tileDims) + offset);
+			if (color == "white") {
+				screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, (p.boardPos.y * tileDims) + offset);
+			}
+			else {
+				screenPos = sf::Vector2f((p.boardPos.x * tileDims) + offset, ((7 - p.boardPos.y) * tileDims) + offset);
+			}
 		}
-
+		
 		sf::Texture texture;
 		sf::Sprite piece;
 
@@ -111,9 +126,6 @@ void drawLegalMoves(CompressedPiece p, std::string color) {
 int getClickedMove(CompressedPiece &p, std::string color) {
 	sf::Vector2i posClicked = sf::Mouse::getPosition(clientWindow);
 	for (auto m : p.legalMoves) {
-
-
-
 		sf::Vector2f screenPos;
 		if (color == "white") {
 			screenPos = sf::Vector2f((m.moveCoords.x * tileDims) + offset, (m.moveCoords.y * tileDims) + offset);
@@ -182,13 +194,15 @@ void windowThread() {
 			if (evnt.type == sf::Event::Closed) clientWindow.close();
 
 			//online game events
-			if (evnt.type == sf::Event::MouseButtonPressed && Client::instance()->getGameState().getCurrentGameTurn() == Client::instance()->getColor() && Client::instance()->isInGame()) {
+			if (evnt.type == sf::Event::MouseButtonPressed && Client::instance()->getGameState().getCurrentGameTurn() == Client::instance()->getColor() && Client::instance()->isInGame() && Client::instance()->getCurrentScreen() == Client::Screen::OnlineGame) {
 				if (isPieceSelected && pieceSelected.name != "not_found") {
 					int moveId = getClickedMove(pieceSelected, Client::instance()->getColor());
 					if (moveId > 0) {
 						if (Client::instance()->playSounds()) moveSound.play();
 						std::string type = "game_req/";
 						Client::instance()->addReqToQueue(type.append(std::to_string(moveId)).append("/").append(Client::instance()->getName()).append("/").append(Client::instance()->getMatchName()));
+						isPieceSelected = false;
+						pieceSelected = CompressedPiece("not_found;99;;");
 					}
 				}
 
@@ -199,6 +213,18 @@ void windowThread() {
 				}
 				else {
 					isPieceSelected = false;
+				}
+			}
+			else if (evnt.type == sf::Event::MouseButtonReleased && Client::instance()->getGameState().getCurrentGameTurn() == Client::instance()->getColor() && Client::instance()->isInGame() && Client::instance()->getCurrentScreen() == Client::Screen::OnlineGame) {
+				if (isPieceSelected && pieceSelected.name != "not_found") {
+					int moveId = getClickedMove(pieceSelected, Client::instance()->getColor());
+					if (moveId > 0) {
+						if (Client::instance()->playSounds()) moveSound.play();
+						std::string type = "game_req/";
+						Client::instance()->addReqToQueue(type.append(std::to_string(moveId)).append("/").append(Client::instance()->getName()).append("/").append(Client::instance()->getMatchName()));
+						isPieceSelected = false;
+						pieceSelected = CompressedPiece("not_found;99;;");
+					}
 				}
 			}
 
@@ -209,6 +235,8 @@ void windowThread() {
 					if (moveId > 0) {
 						if (Client::instance()->playSounds()) moveSound.play();
 						Client::instance()->getSoloGameInstance()->getPlayersMove(moveId);
+						isPieceSelected = false;
+						pieceSelected = CompressedPiece("not_found;99;;");
 					}
 				}
 
@@ -221,12 +249,24 @@ void windowThread() {
 					isPieceSelected = false;
 				}
 			}
+			else if (evnt.type == sf::Event::MouseButtonReleased && Client::instance()->getColor() == Client::instance()->getSoloGameInstance()->getCurrentTurn() && Client::instance()->getCurrentScreen() == Client::Screen::OfflineGame) {
+				if (isPieceSelected && pieceSelected.name != "not_found") {
+					int moveId = getClickedMove(pieceSelected, Client::instance()->getColor());
+					if (moveId > 0) {
+						if (Client::instance()->playSounds()) moveSound.play();
+						Client::instance()->getSoloGameInstance()->getPlayersMove(moveId);
+						isPieceSelected = false;
+						pieceSelected = CompressedPiece("not_found;99;;");
+					}
+				}
+			}
+
 			if (GuiManager::instance()->mainUIHandleFree()) {
 				GuiManager::instance()->getMainUIHandle()->handleEvent(evnt);
 			}
 		}
 
-
+		//online game drawing
 		if (Client::instance()->getCurrentScreen() == Client::Screen::OnlineGame) {
 			if (isPieceSelected && Client::instance()->doHighlightLegals()) GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
 				&drawLegalMoves, pieceSelected, Client::instance()->getColor());
@@ -243,11 +283,12 @@ void windowThread() {
 
 		}
 
+		
 		else {
 
 			if (bgLoaded) bgLoaded = false;
 
-
+			//menu drawing
 			if (Client::instance()->getCurrentScreen() == Client::Screen::Menu) {
 				if (GuiManager::instance()->isShowingMessageBox()) {
 					GuiManager::instance()->drawGui(splash, dimm);
@@ -256,7 +297,7 @@ void windowThread() {
 				else GuiManager::instance()->drawGui(splash);
 			}
 
-
+			//lobby drawing
 			else if (Client::instance()->getCurrentScreen() == Client::Screen::Lobby) {
 
 				if (GuiManager::instance()->isShowingMessageBox()) {
@@ -280,6 +321,7 @@ void windowThread() {
 			}
 
 
+			//offline game drawing
 			else if (Client::instance()->getCurrentScreen() == Client::Screen::OfflineGame) {
 
 				if (isPieceSelected && Client::instance()->doHighlightLegals()) GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),

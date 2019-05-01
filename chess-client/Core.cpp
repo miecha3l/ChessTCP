@@ -89,7 +89,7 @@ CompressedPiece getPieceClicked(sf::RenderWindow &w, GameState gs, std::string c
 				return p;
 			}
 		}
-		return CompressedPiece("not_found;00;;");
+		return CompressedPiece("not_found;99;;");
 	}
 	else {
 		for (auto p : gs.getBlackPieces()) {
@@ -99,7 +99,7 @@ CompressedPiece getPieceClicked(sf::RenderWindow &w, GameState gs, std::string c
 				return p;
 			}
 		}
-		return CompressedPiece("not_found;00;;");
+		return CompressedPiece("not_found;99;;");
 	}
 }
 
@@ -146,7 +146,7 @@ int getClickedMove(CompressedPiece &p, std::string color) {
 void windowThread() {
 	bool isPieceSelected = false;
 	bool bgLoaded = false;
-	CompressedPiece pieceSelected("not_found;00;;");
+	CompressedPiece pieceSelected("not_found;99;;");
 	sf::RectangleShape dimm(sf::Vector2f(1000, 760));
 	dimm.setFillColor(sf::Color(20, 20, 20, 150));
 
@@ -277,9 +277,9 @@ void windowThread() {
 				if (isPieceSelected && Client::instance()->doHighlightLegals())GuiManager::instance()->drawGui(background, dimm, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
 					&drawLegalMoves, pieceSelected, Client::instance()->getColor());
 
-				else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor());
+				else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(), pieceSelected);
 			}
-			else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor());
+			else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(), pieceSelected);
 
 		}
 
@@ -332,14 +332,14 @@ void windowThread() {
 					if (isPieceSelected && Client::instance()->doHighlightLegals())GuiManager::instance()->drawGui(background, dimm, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(),
 						&drawLegalMoves, pieceSelected, Client::instance()->getColor());
 
-					else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor());
+					else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(), pieceSelected);
 				}
-				else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor());
+				else GuiManager::instance()->drawGui(background, &drawGameState, Client::instance()->getGameState(), Client::instance()->getColor(), pieceSelected);
 
 
 				if (Client::instance()->getSoloGameInstance()->getCurrentTurn() != Client::instance()->getColor()) {
 					isPieceSelected = false;
-					pieceSelected = CompressedPiece("not_found;00;;");
+					pieceSelected = CompressedPiece("not_found;99;;");
 				}
 			}
 		}

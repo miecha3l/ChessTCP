@@ -86,10 +86,10 @@ public:
 	void drawGui(sf::Sprite bg, sf::RectangleShape);
 
 	//draw with gs 
-	void drawGui(sf::Sprite bg, void(*f)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3);
+	void drawGui(sf::Sprite bg, void(*f)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3, CompressedPiece p4);
 
 	//draw with gs & dimm
-	void drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*f)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3);
+	void drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*f)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3, CompressedPiece p4);
 
 	//draw with gs & legals
 	void drawGui(sf::Sprite bg, void(*drawGs)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3,

@@ -333,12 +333,12 @@ void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm)
 	}
 }
 
-void GuiManager::drawGui(sf::Sprite bg, void(*drawGs)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3)
+void GuiManager::drawGui(sf::Sprite bg, void(*drawGs)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3, CompressedPiece p4)
 {
 	if (!lockGuiDraw) {
 		clientWindow.clear();
 		clientWindow.draw(bg);
-		(*drawGs)(p1, p3, CompressedPiece("not_found;99;;"));
+		(*drawGs)(p1, p3, p4);
 		try {
 			mainUI.draw();
 		}
@@ -346,12 +346,12 @@ void GuiManager::drawGui(sf::Sprite bg, void(*drawGs)(GameState, std::string col
 	}
 }
 
-void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*drawGs)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3)
+void GuiManager::drawGui(sf::Sprite bg, sf::RectangleShape dimm, void(*drawGs)(GameState, std::string color, CompressedPiece), GameState p1, std::string p3, CompressedPiece p4)
 {
 	if (!lockGuiDraw) {
 		clientWindow.clear();
 		clientWindow.draw(bg);
-		(*drawGs)(p1, p3, CompressedPiece("not_found;99;;"));
+		(*drawGs)(p1, p3, p4);
 		clientWindow.draw(dimm);
 		try {
 			mainUI.draw();
